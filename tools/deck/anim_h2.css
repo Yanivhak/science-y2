@@ -1,0 +1,12 @@
+.h2a{position:relative;margin-top:2px}
+.h2a svg{display:block;width:100%;height:auto;max-height:430px}
+.h2a .nucH{fill:#1F3A63;stroke:#fff;stroke-width:3}
+.h2a .ntH{fill:#fff;font-weight:900;font-size:22px;text-anchor:middle;direction:ltr}
+.h2a .eH{fill:#2E6FE0;stroke:#fff;stroke-width:1.5}   /* אלקטרון: כחול בכל השיעורים (14.11) */
+.h2a .eT{fill:#2E6FE0}
+.h2a .nglH{fill:#CFE6FA}
+.h2a .elb{fill:#EAF1FB;font-weight:900;font-size:22px;text-anchor:middle;direction:ltr}
+.h2a .arr{stroke-width:5;stroke-linecap:round;fill:none;transition:opacity .4s}
+.h2a .arr.rep{stroke:#C0392B}.h2a .arr.att{stroke:#1E8A50}
+.h2a .mlb{fill:#EAF1FB;font-weight:900;font-size:34px;text-anchor:middle;direction:rtl;transition:opacity .6s}
+.h2a .an-cap .cr{color:#E5534B;font-weight:800}.h2a .an-cap .cg{color:#3FB27F;font-weight:800}

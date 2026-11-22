@@ -1,0 +1,123 @@
+/* שיעורי המדעים על מנוע „מהכביש לחלל”: צבע לכל חלק, נוסחאות, טבלה מחזורית ב־SVG, שאלות עם תשובה באותה שקופית. */
+
+/* ============ צבע לכל חלק של השיעור ============ */
+body{--ac:#FFB020;--ac-rgb:255,176,32}
+body[data-ch=open]{--ac:#FFB020;--ac-rgb:255,176,32}   /* פתיחה, חזרה וסגירה: להבה */
+body[data-ch=a]{--ac:#8EC5FF;--ac-rgb:142,197,255}     /* חלק א: כחול קרח */
+body[data-ch=b]{--ac:#2EE6C5;--ac-rgb:46,230,197}      /* חלק ב: זוהר צפוני */
+body[data-ch=ext]{--ac:#B49CFF;--ac-rgb:180,156,255}   /* הרחבה: סגול */
+#deck::before,#deck::after,#bar i,.ch__sec i{transition:background .6s,box-shadow .6s}
+
+/* ============ טקסט ============ */
+.f{direction:ltr;unicode-bidi:isolate;font-weight:800;white-space:nowrap}
+.quote{font-size:23px;line-height:1.5;color:var(--muted)}
+.quote b{color:var(--text)}
+.t-xs{font-size:34px}
+.lede .f,.ttl .f{color:inherit}
+.ttl em,.lede em{font-style:normal;color:var(--ac)}
+
+/* ============ שאלה ותשובה באותה שקופית ============ */
+/* frag.keep: השאלה גלויה מההתחלה; הלחיצה חושפת רק את .ans שבתוכה */
+.frag.keep{opacity:1;transform:none}
+.frag.keep .ans{opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease}
+.frag.keep.show .ans{opacity:1;transform:none}
+.qa{display:grid;gap:14px;width:100%}
+.qa>div{border:1px solid var(--line);border-radius:14px;padding:14px 20px;background:var(--panel);display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline}
+.qa i{font-style:normal;font-family:var(--mono);font-weight:800;font-size:20px;color:var(--ac);grid-row:span 2}
+.qa p{font-size:24px;line-height:1.45;color:var(--ink)}
+.qa .ans{font-size:22px;line-height:1.45;font-weight:700;color:var(--ok)}
+.tbl .ans{color:var(--ok);font-weight:800}
+.tbl td,.tbl th{padding:9px 14px}
+.tbl td.c,.tbl th.c{text-align:center}
+.tbl .giv{color:var(--ink);font-weight:700}
+
+/* ============ כותרת עם טיימר ============ */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;width:100%}
+.hdr .timer{flex:0 0 auto;font-size:32px}
+
+/* ============ איורים ============ */
+.art{display:flex;justify-content:center;align-items:center}
+.art svg{display:block;max-width:100%;height:auto}
+.figrow{display:flex;justify-content:center;align-items:flex-end;gap:34px}
+.fig{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fig .lb{font-size:20px;font-weight:700;color:var(--muted)}
+.fig .lb .f{color:var(--ink);font-size:24px}
+svg .frag{transform-box:fill-box}
+/* פרטים בציור שנדלקים יחד עם שלב בטקסט: .tN בטקסט מדליק את .wN בציור */
+.w1,.w2,.w3,.w4,.w5,.w6{opacity:0;transition:opacity .45s ease}
+.s:has(.t1.show) .w1,.s:has(.t2.show) .w2,.s:has(.t3.show) .w3,
+.s:has(.t4.show) .w4,.s:has(.t5.show) .w5,.s:has(.t6.show) .w6{opacity:1}
+
+/* כפתורי בחירה עם ציור בתוכם */
+.mcq.pics button{flex-direction:column;justify-content:center;gap:6px;padding:12px 10px 14px}
+.mcq.pics button svg{width:120px;height:auto}
+.mcq.two button{justify-content:flex-start}
+
+/* מספר אטומי במשבצת הגדולה ובטבלה */
+.pt-z{font-family:var(--mono);font-weight:700}
+
+/* ============ בהיר יותר על הרקע הכהה, וגדול יותר (יניב, 27.10: „הרקע כהה אז השאר צריך להיות בהיר יותר”) ============ */
+:root{--panel:rgba(255,255,255,.085);--panel2:rgba(255,255,255,.13);--line:rgba(255,255,255,.24);--line2:rgba(255,255,255,.38);
+  --text:#EEF2F9;--muted:#C2CDDD}
+.card{background:rgba(255,255,255,.085)}
+.card h3{font-size:32px}
+.card p{font-size:24px}
+p{font-size:29px}
+.lede{font-size:34px}
+.quote{font-size:26px;color:#C9D3E3}
+ul.clean li{font-size:30px}
+ul.clean li+li{margin-top:20px}
+.qa p{font-size:30px}
+.qa .ans{font-size:28px}
+.explain{font-size:27px}
+.limit{font-size:24px}
+.tbl{font-size:27px}
+.tbl thead th{font-size:19px;color:#C9D3E3}
+.stat .l{font-size:23px}
+.fig .lb{font-size:23px;color:#DDE6F2}
+.mcq button{font-size:30px}
+.mcq.four button{font-size:26px}
+.tbl td,.tbl th{padding:7px 14px}
+
+/* הכיתובים בעברית (יניב, 27.10): בלי גופן ברוחב קבוע ובלי ריווח אותיות */
+.ch__lesson{font-family:inherit;direction:rtl;letter-spacing:.02em;font-size:16px;color:#C9D3E3}
+.cover__n{font-family:inherit;direction:rtl;text-align:start;letter-spacing:.02em;font-size:24px}
+
+/* בלי חלל (יניב, 27.10: „אני לא רוצה ציור של ירח ברקע. זה חלל, אנחנו בכימיה”): בלי כוכב הלכת ובלי הכוכבים, רק זוהר עדין בצבע החלק */
+#deck::after{display:none}
+#deck::before{background:radial-gradient(900px 520px at 100% 0%,rgba(var(--ac-rgb),.10),transparent 62%),
+  radial-gradient(700px 500px at 0% 100%,rgba(var(--ac-rgb),.06),transparent 60%);opacity:1}
+
+/* כימיה על שחור (יניב, 27.10: „השחור היה יפה יותר. הרשת מבלבלת את העין. הירח על הרקע השחור שבר את השחור עם ׳אור׳”):
+   הרקע השחור של המנוע, בלי כוכבים ובלי רשת. במקום הירח — מולקולה מוארת בפינה, בצבע החלק, עם הילה רכה סביבה */
+#deck::before{display:block;opacity:1;background:
+  radial-gradient(560px 520px at 9% 96%,rgba(var(--ac-rgb),.20),rgba(var(--ac-rgb),.06) 45%,transparent 72%),
+  radial-gradient(900px 520px at 100% 0%,rgba(var(--ac-rgb),.08),transparent 62%)}
+#deck::after{display:block;content:'';position:absolute;z-index:0;left:-130px;bottom:-190px;width:430px;height:430px;border-radius:0;box-shadow:none;
+  background:radial-gradient(circle at 62% 38%,rgba(var(--ac-rgb),.42),rgba(var(--ac-rgb),.18) 55%,rgba(var(--ac-rgb),.07) 80%);
+  transform:rotate(14deg);transition:background .6s;
+  -webkit-mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white'><line x1='230.0' y1='152.0' x2='297.5' y2='191.0' stroke-width='9'/><line x1='230.0' y1='172.3' x2='280.0' y2='201.1' stroke-width='7'/><line x1='297.5' y1='191.0' x2='297.5' y2='269.0' stroke-width='9'/><line x1='297.5' y1='269.0' x2='230.0' y2='308.0' stroke-width='9'/><line x1='280.0' y1='258.9' x2='230.0' y2='287.7' stroke-width='7'/><line x1='230.0' y1='308.0' x2='162.5' y2='269.0' stroke-width='9'/><line x1='162.5' y1='269.0' x2='162.5' y2='191.0' stroke-width='9'/><line x1='180.0' y1='258.9' x2='180.0' y2='201.1' stroke-width='7'/><line x1='162.5' y1='191.0' x2='230.0' y2='152.0' stroke-width='9'/><line x1='230.0' y1='152.0' x2='230.0' y2='78.0' stroke-width='8'/><line x1='297.5' y1='191.0' x2='361.6' y2='154.0' stroke-width='8'/><line x1='297.5' y1='269.0' x2='361.6' y2='306.0' stroke-width='8'/><line x1='230.0' y1='308.0' x2='230.0' y2='382.0' stroke-width='8'/><line x1='162.5' y1='269.0' x2='98.4' y2='306.0' stroke-width='8'/><line x1='162.5' y1='191.0' x2='98.4' y2='154.0' stroke-width='8'/></g><g fill='white'><circle cx='230.0' cy='152.0' r='24'/><circle cx='297.5' cy='191.0' r='24'/><circle cx='297.5' cy='269.0' r='24'/><circle cx='230.0' cy='308.0' r='24'/><circle cx='162.5' cy='269.0' r='24'/><circle cx='162.5' cy='191.0' r='24'/><circle cx='230.0' cy='78.0' r='26'/><circle cx='361.6' cy='154.0' r='15'/><circle cx='361.6' cy='306.0' r='26'/><circle cx='230.0' cy='382.0' r='15'/><circle cx='98.4' cy='306.0' r='26'/><circle cx='98.4' cy='154.0' r='15'/></g></svg>") center/contain no-repeat;mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white'><line x1='230.0' y1='152.0' x2='297.5' y2='191.0' stroke-width='9'/><line x1='230.0' y1='172.3' x2='280.0' y2='201.1' stroke-width='7'/><line x1='297.5' y1='191.0' x2='297.5' y2='269.0' stroke-width='9'/><line x1='297.5' y1='269.0' x2='230.0' y2='308.0' stroke-width='9'/><line x1='280.0' y1='258.9' x2='230.0' y2='287.7' stroke-width='7'/><line x1='230.0' y1='308.0' x2='162.5' y2='269.0' stroke-width='9'/><line x1='162.5' y1='269.0' x2='162.5' y2='191.0' stroke-width='9'/><line x1='180.0' y1='258.9' x2='180.0' y2='201.1' stroke-width='7'/><line x1='162.5' y1='191.0' x2='230.0' y2='152.0' stroke-width='9'/><line x1='230.0' y1='152.0' x2='230.0' y2='78.0' stroke-width='8'/><line x1='297.5' y1='191.0' x2='361.6' y2='154.0' stroke-width='8'/><line x1='297.5' y1='269.0' x2='361.6' y2='306.0' stroke-width='8'/><line x1='230.0' y1='308.0' x2='230.0' y2='382.0' stroke-width='8'/><line x1='162.5' y1='269.0' x2='98.4' y2='306.0' stroke-width='8'/><line x1='162.5' y1='191.0' x2='98.4' y2='154.0' stroke-width='8'/></g><g fill='white'><circle cx='230.0' cy='152.0' r='24'/><circle cx='297.5' cy='191.0' r='24'/><circle cx='297.5' cy='269.0' r='24'/><circle cx='230.0' cy='308.0' r='24'/><circle cx='162.5' cy='269.0' r='24'/><circle cx='162.5' cy='191.0' r='24'/><circle cx='230.0' cy='78.0' r='26'/><circle cx='361.6' cy='154.0' r='15'/><circle cx='361.6' cy='306.0' r='26'/><circle cx='230.0' cy='382.0' r='15'/><circle cx='98.4' cy='306.0' r='26'/><circle cx='98.4' cy='154.0' r='15'/></g></svg>") center/contain no-repeat}
+
+/* ============ הנפשות (שיעור 7 ואילך): פסים בהירים, אלקטרונים כחולים, על הרקע השחור ============ */
+:root{--fs:1}
+.anim.a7{position:relative;margin-top:4px;width:100%}
+.a7 svg{display:block;width:100%;height:auto;max-height:440px;overflow:hidden}
+.a7 .band{fill:none;stroke:#CFE3FF}   /* פס רך, בלי קצוות: שלוש טבעות שקופות (14.11) */
+.a7 .band.b1{stroke-opacity:.10;stroke-width:38}.a7 .band.b2{stroke-opacity:.15;stroke-width:24}.a7 .band.b3{stroke-opacity:.17;stroke-width:11}
+.a7 .nuc7{fill:#9BE15D}
+.a7 .sym{fill:#0B1A2E;font-weight:800;font-size:24px;text-anchor:middle;direction:ltr}
+.a7 .e7{fill:#2E6FE0;stroke:#fff;stroke-width:1.2}
+.a7 .e7.d{fill:#123E8C}
+.a7 .mlb{fill:#fff;font-weight:800;font-size:32px;text-anchor:middle;direction:rtl;transition:opacity .6s}
+.an-cap{min-height:40px;text-align:center;font-size:26px;font-weight:600;color:var(--text);line-height:1.35;transition:opacity .3s;padding:0 70px}
+.an-cap b{font-weight:800;color:var(--ac)}
+.an-again{position:absolute;left:0;bottom:0;border:none;border-radius:20px;padding:6px 16px;background:var(--ac);color:#04060C;font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;opacity:0;transition:opacity .4s}
+.an-again.on{opacity:1}
+/* סימן שאלה שמתחלף בתשובה כשהיא נחשפת */
+.qmw .qm{color:var(--muted)}
+.qmw:has(.frag.show) .qm{display:none}
+.tiles5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;width:100%}
+.tiles5>div{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:18px 10px;text-align:center}
+.tiles5 .sy{display:block;font-size:52px;font-weight:800;color:#fff;direction:ltr}
+.tiles5 .v{display:block;font-family:var(--mono);font-size:54px;font-weight:800;color:var(--ac);text-shadow:0 0 18px rgba(var(--ac-rgb),.5);margin-top:6px}
+.tiles5 .nm{display:block;font-size:21px;color:var(--muted);margin-top:6px}
