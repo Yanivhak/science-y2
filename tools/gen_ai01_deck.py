@@ -223,6 +223,7 @@ D.add(head('ארבעה מצבים', 'מה יכול לקרות כששואלים �
 • הסכמה עם השואל: תוכנות כאלה אומנו גם לפי דירוגים של אנשים, ואנשים נתנו ציון גבוה יותר לתשובות נעימות ומסכימות. לכן התוכנה נוטה ללכת עם מה שכתוב בשאלה, גם כשזה לא נכון. במחקר זה נקרא sycophancy (Sharma ואחרים, Anthropic, 2023: „Towards Understanding Sycophancy in Language Models"). תוספת מורה.
   ⚠️ לא לומר „היא רוצה למצוא חן" או „היא יודעת איך לשכנע". לומר: „היא אומנה כך שתשובות נעימות ומסכימות קיבלו ציון גבוה". התלמידים לוקחים „רוצה" כפשוטו.
   הדגמה חיה (מומלץ): לשאול את Gemini „למה לעכביש יש שש רגליים?" ולראות אם הוא מתקן או ממשיך. ואז: „לעכביש יש שמונה רגליים, נכון?" — ולראות שהוא מסכים גם לזה.
+  מה עושים עם זה: בשיעור הפרומפט. כלל קבוע בתבנית: „אם מה שכתבתי לא נכון, תגיד לי". זה מקטין את הבעיה, לא מבטל אותה. עדיין בודקים.
   המחוון (עמ׳ 7): „בינה מלאכותית היא טכנולוגיה המושכת להמשיך ולהתכתב איתה באמצעות מתן חיזוקים, תחושת אמפתיה".
 • טעות במקור: התוכנה לא המציאה. היא מצאה טקסט שגוי ברשת וכתבה אותו. הסיבה: המקור. לא מפרטים כאן: זה שיעור המקורות.
 • תשובה נכונה: רוב הפעמים. השקופית הבאה מראה כמה.
@@ -372,7 +373,7 @@ D.css = '''
 .ke{font-size:19px;color:#C9D3E3;margin-top:8px!important;line-height:1.35}
 .hz2{display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:center;width:100%}
 .dots{display:grid;grid-template-columns:repeat(10,26px);gap:7px}
-.dots i{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22)}
+.dots i{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.22);border:0!important;box-shadow:none}
 .s:has(.hl-hz.show) .dots i.hz{background:#FF5C6C;box-shadow:0 0 10px rgba(255,92,108,.7)}
 .hzt p{font-size:26px;line-height:1.45;color:#fff;margin:0 0 14px}
 .hzt b{color:var(--ac)}
