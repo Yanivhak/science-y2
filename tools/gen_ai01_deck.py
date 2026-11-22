@@ -49,7 +49,7 @@ def writer(fixed, steps, q='איזו מילה תבוא עכשיו?'):
 
 
 # ======================= 1. פתיחה: מה נעשה היום =======================
-PLAN = ['איך התוכנה כותבת', 'עכשיו אתם התוכנה', 'חיפוש מול צ׳אט', 'מצא את הטעות', 'כמה פעמים זה קורה', 'הכלל']
+PLAN = ['איך התוכנה כותבת', 'עכשיו אתם התוכנה', 'חיפוש מול צ׳אט', 'מצא את הטעות', 'עבודה בזוגות', 'הכלל']
 D.add('  <p class="eyebrow anim">בינה מלאכותית, שיעור 1</p>\n  <h2 class="ttl t-lg anim">איך התוכנה כותבת,<br>ולמה בודקים אותה</h2>'
       + '\n  <ol class="today mt">' + ''.join(f'<li class="frag">{x}</li>' for x in PLAN) + '</ol>',
       '''פתיחה: מה נעשה היום
@@ -93,6 +93,36 @@ D.add(head('עכשיו אתם התוכנה', 'איזו מילה תבוא עכש�
 • אם בחרו „חול": „האם זה יכול לקרות? כן, אבל זה פחות סביר. התוכנה כמעט לא תבחר בה."
 המסקנה: כי התוכנה בוחרת מתוך כמה מילים סבירות („דגימה הסתברותית" במחוון), שני תלמידים ששואלים את אותה שאלה יכולים לקבל תשובות שונות.
 {SRC}''', 'עכשיו אתם התוכנה', 'a', 'עכשיו אתם התוכנה', mins=5, hook='pick')
+
+
+# ======================= 4א. התוכנה היא לא אדם (הומור, יניב 22.11) =======================
+def person_svg():
+    return ('<svg viewBox="0 0 200 230" width="190"><circle cx="100" cy="52" r="34" fill="#FFD7A8"/>'
+            '<circle cx="88" cy="48" r="4" fill="#1B2433"/><circle cx="112" cy="48" r="4" fill="#1B2433"/>'
+            '<path d="M86 64 Q100 76 114 64" stroke="#1B2433" stroke-width="4" fill="none" stroke-linecap="round"/>'
+            '<rect x="56" y="94" width="88" height="96" rx="30" fill="#5AA9E6"/>'
+            '<rect x="66" y="186" width="22" height="40" rx="9" fill="#1B3050"/><rect x="112" y="186" width="22" height="40" rx="9" fill="#1B3050"/></svg>')
+def computer_svg():
+    rows = ''.join(f'<rect x="{34 + (k % 2) * 14}" y="{44 + k * 22}" width="{96 - (k % 3) * 18}" height="10" rx="5" fill="#8EC5FF" opacity=".85"/>' for k in range(5))
+    return ('<svg viewBox="0 0 200 230" width="190"><rect x="18" y="24" width="164" height="136" rx="14" fill="#1B3050" stroke="#8EC5FF" stroke-width="4"/>'
+            + rows + '<rect x="146" y="132" width="6" height="16" fill="#8EC5FF"><animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/></rect>'
+            '<rect x="70" y="160" width="60" height="22" fill="#1B3050"/><rect x="40" y="182" width="120" height="14" rx="7" fill="#1B3050" stroke="#8EC5FF" stroke-width="3"/></svg>')
+ROWS_NP = [('אוכל פלאפל', True, False), ('ישן בלילה', True, False), ('נעלב כשמתקנים אותו', True, False), ('כותב מילה אחרי מילה', True, True)]
+rows_np = ''.join(f'<div class="np-r frag"><span class="np-t">{t}</span><span class="np-m {"y" if a else "n"}">{"✓" if a else "✗"}</span><span class="np-m {"y" if b else "n"}">{"✓" if b else "✗"}</span></div>' for t, a, b in ROWS_NP)
+D.add(head('רגע, מי זה?', 'התוכנה היא לא אדם') + f'''
+  <div class="np mt">
+    <div class="np-h"><span></span><span class="np-fig">{person_svg()}<b>אדם</b></span><span class="np-fig">{computer_svg()}<b>תוכנה</b></span></div>
+    {rows_np}
+  </div>
+  <p class="frag concl">התוכנה כותבת כמו אדם, כי היא למדה מטקסטים שאנשים כתבו. אבל אין לה גוף, ואין לה רגשות.</p>''',
+      '''התוכנה היא לא אדם
+שקופית קלה, עם הומור (יניב, 22.11). כל לחיצה מוסיפה שורה. לשאול לפני כל לחיצה: „מי מהשניים עושה את זה?"
+• אוכל פלאפל, ישן בלילה: ברור. זה החלק המצחיק.
+• נעלב כשמתקנים אותו: לתוכנה אין רגשות. מותר לכתוב לה „טעית". זה גם מכין את שיעור 2 (הסכמה עם השואל).
+• כותב מילה אחרי מילה: את זה שניהם עושים. בגלל זה הטקסט של התוכנה נשמע כמו של אדם.
+⚠️ ההומור כאן מילולי ולא אירוני: כל שורה נכונה כפשוטה. לא להוסיף בדיחות שתלויות בטון.
+המחוון, עמ׳ 6: „להסביר שמודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם… לחקות שיחה אנושית".
+הציור: אדם ומחשב פשוטים, בלי פרצוף על המחשב, כדי לא לרמוז שיש בו מישהו.''', 'התוכנה היא לא אדם', 'a', 'עכשיו אתם התוכנה', mins=3)
 
 
 # ======================= 5. חיפוש מול צ׳אט =======================
@@ -198,6 +228,26 @@ D.add(head('כמה פעמים זה קורה?', 'בערך 10 מתוך 100 פעמ�
 ⚠️ אם תלמיד שואל „איזו הכי טובה": הבדיקה מודדת רק סיכום של טקסט נתון, הטבלה מתעדכנת כל חודש, ובבדיקות אחרות הסדר שונה.
 גילוי נאות: Claude, התוכנה שעזרה לבנות את השיעור, נמצאת בטבלה הזו (Opus 5.5: 9.9 מתוך 100).''', 'כמה פעמים זה קורה', 'b', 'כמה פעמים זה קורה', mins=4)
 
+
+
+# ======================= 7ג. משימה בזוגות =======================
+TASK = ['שאלו את Gemini שאלה אחת מהרשימה.', 'כתבו במחברת מה Gemini ענה.', 'בדקו בעצמכם: סופרים, או מחפשים בספר.', 'סמנו ✓ או ✗.']
+QS = ['כמה פעמים מופיעה האות ר׳ במילה „ברברים"?', 'כמה רגליים יש לעכביש?', 'באיזו טמפרטורה מים רותחים?']
+D.add(head('עבודה בזוגות, 10 דקות', 'עכשיו אתם בודקים') + '''
+  <div class="task mt">
+    <ol class="steps">''' + ''.join(f'<li class="frag">{t}</li>' for t in TASK) + '''</ol>
+    <div class="qlist frag"><p class="lab">השאלות</p>''' + ''.join(f'<p>{q}</p>' for q in QS) + '''</div>
+  </div>
+  <p class="frag concl">בסוף: כל זוג אומר בקול תשובה אחת. האם כולם קיבלו אותה תשובה?</p>''',
+      '''משימה בזוגות: עכשיו אתם בודקים
+בזוגות, מכשיר אחד לזוג, Gemini בחשבון של משרד החינוך. 10 דקות.
+⚠️ רק אחרי אישור הורים (הנחיות משרד החינוך, ינואר 2026). בלי אישור: המשימה עוברת לשיעור הבא, או שהמורה שואל על המקרן והזוגות בודקים במחברת.
+• השאלות קבועות ומודפסות. לא „שאלו מה שבא לכם": משימה פתוחה נתקעת.
+• לנסות את השאלות ב-Gemini יום לפני, ולהשאיר את אלה שיצאו מעניינות.
+• „ברברים": ב-ר-ב-ר-י-ם, האות ר׳ פעמיים. תוכנות טועות לפעמים בספירת אותיות, כי הן בוחרות מילים ולא סופרות אותיות.
+• אם כל הזוגות קיבלו תשובה נכונה: גם זה תוצאה. „ברוב הפעמים התוכנה צודקת" — ובכל זאת בדקנו, ועכשיו אנחנו יודעים.
+• אם זוגות קיבלו תשובות שונות: זו המסקנה של „עכשיו אתם התוכנה". התוכנה בוחרת מתוך כמה מילים סבירות.
+המחוון, תחום 2ב: „הצלבות מידע מול מקורות חיצוניים" (עמ׳ 9).''', 'עבודה בזוגות', 'b', 'עבודה בזוגות', mins=12)
 
 
 # ======================= 8. הכלל =======================
@@ -326,6 +376,22 @@ D.css = '''
 .hzt p{font-size:26px;line-height:1.45;color:#fff;margin:0 0 14px}
 .hzt b{color:var(--ac)}
 .src{font-size:19px;color:#C9D3E3;margin:10px 0 0}
+.np{display:grid;gap:8px;width:100%;max-width:880px;margin-inline:auto}
+.np-h,.np-r{display:grid;grid-template-columns:1fr 200px 200px;align-items:center;gap:10px}
+.np-fig{display:grid;justify-items:center;gap:2px}
+.np-fig svg{width:120px;height:auto}
+.np-fig b{font-size:24px;color:#fff;font-weight:800}
+.np-t{font-size:28px;font-weight:700;color:#fff}
+.np-m{justify-self:center;font-size:36px;font-weight:900}
+.np-m.y{color:#3DDC97}.np-m.n{color:#FF5C6C}
+.np-r{padding:6px 0;border-top:1px solid rgba(255,255,255,.12)}
+.task{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start;width:100%}
+.steps{margin:0;padding-inline-start:34px;display:grid;gap:12px}
+.steps li{font-size:28px;font-weight:700;color:#fff;line-height:1.35}
+.steps li::marker{color:var(--ac);font-weight:800}
+.qlist{padding:16px 22px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.qlist p{margin:0 0 10px;font-size:24px;color:#fff;line-height:1.4}
+.qlist .lab{font-size:19px}
 @media (prefers-reduced-motion:reduce){.br i{animation:none!important}.sent .nw{transition:none!important}.sent .cur{animation:none}}
 '''
 

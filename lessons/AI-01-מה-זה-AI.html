@@ -642,6 +642,22 @@ ul.clean li+li{margin-top:20px}
 .hzt p{font-size:26px;line-height:1.45;color:#fff;margin:0 0 14px}
 .hzt b{color:var(--ac)}
 .src{font-size:19px;color:#C9D3E3;margin:10px 0 0}
+.np{display:grid;gap:8px;width:100%;max-width:880px;margin-inline:auto}
+.np-h,.np-r{display:grid;grid-template-columns:1fr 200px 200px;align-items:center;gap:10px}
+.np-fig{display:grid;justify-items:center;gap:2px}
+.np-fig svg{width:120px;height:auto}
+.np-fig b{font-size:24px;color:#fff;font-weight:800}
+.np-t{font-size:28px;font-weight:700;color:#fff}
+.np-m{justify-self:center;font-size:36px;font-weight:900}
+.np-m.y{color:#3DDC97}.np-m.n{color:#FF5C6C}
+.np-r{padding:6px 0;border-top:1px solid rgba(255,255,255,.12)}
+.task{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start;width:100%}
+.steps{margin:0;padding-inline-start:34px;display:grid;gap:12px}
+.steps li{font-size:28px;font-weight:700;color:#fff;line-height:1.35}
+.steps li::marker{color:var(--ac);font-weight:800}
+.qlist{padding:16px 22px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.qlist p{margin:0 0 10px;font-size:24px;color:#fff;line-height:1.4}
+.qlist .lab{font-size:19px}
 @media (prefers-reduced-motion:reduce){.br i{animation:none!important}.sent .nw{transition:none!important}.sent .cur{animation:none}}
 
 </style>
@@ -659,7 +675,7 @@ ul.clean li+li{margin-top:20px}
 <section data-min="2" data-ch="open" data-sec="פתיחה" data-title="מה נעשה היום" class="s" data-notes="&lt;b&gt;פתיחה: מה נעשה היום&lt;/b&gt;כל לחיצה מגלה שלב. לקרוא כל שלב בקול. המבנה קבוע בכל שיעור: התלמידים יודעים מראש מה יקרה.&lt;br&gt;&lt;ul&gt;&lt;li&gt;השיעור בנוי משני חלקים: איך התוכנה כותבת (כחול), ומצא את הטעות (ירוק). נקודת עצירה בין השעות: אחרי „חיפוש מול צ׳אט&amp;quot;.&lt;/li&gt;&lt;li&gt;היום לא נכנסים לכלים בעצמם. רק מסתכלים ומצביעים.&lt;/li&gt;&lt;li&gt;לפני שהתלמידים עובדים עם Gemini בעצמם: הנחיות משרד החינוך (ינואר 2026) מחייבות אישור הורים והכשרה מקדימה. השיעור הזה הוא חלק מההכשרה.&lt;/li&gt;&lt;/ul&gt;">
   <p class="eyebrow anim">בינה מלאכותית, שיעור 1</p>
   <h2 class="ttl t-lg anim">איך התוכנה כותבת,<br>ולמה בודקים אותה</h2>
-  <ol class="today mt"><li class="frag">איך התוכנה כותבת</li><li class="frag">עכשיו אתם התוכנה</li><li class="frag">חיפוש מול צ׳אט</li><li class="frag">מצא את הטעות</li><li class="frag">כמה פעמים זה קורה</li><li class="frag">הכלל</li></ol>
+  <ol class="today mt"><li class="frag">איך התוכנה כותבת</li><li class="frag">עכשיו אתם התוכנה</li><li class="frag">חיפוש מול צ׳אט</li><li class="frag">מצא את הטעות</li><li class="frag">עבודה בזוגות</li><li class="frag">הכלל</li></ol>
 </section>
 
 <section data-min="4" data-ch="a" data-sec="איך התוכנה כותבת" data-title="התוכנה כותבת מילה אחרי מילה" class="s" data-notes="&lt;b&gt;התוכנה כותבת מילה אחרי מילה&lt;/b&gt;מה רואים: משפט שנבנה. לפני כל מילה מופיעות עמודות של מילים אפשריות, והמילה עם העמודה הארוכה נכנסת למשפט.&lt;br&gt;&lt;ul&gt;&lt;li&gt;לחיצה 1: העמודות למילה השלישית. לשאול: „איזו מילה הייתם כותבים?&amp;quot; לפני הלחיצה הבאה.&lt;/li&gt;&lt;li&gt;לחיצה 2: „זורחת&amp;quot; נבחרת ונכנסת למשפט.&lt;/li&gt;&lt;li&gt;לחיצות 3–4: אותו דבר למילה הרביעית, „במזרח&amp;quot;.&lt;/li&gt;&lt;li&gt;לחיצה 5: המשפט שמסכם.&lt;/li&gt;&lt;/ul&gt;לומר במילים: „התוכנה בוחרת&amp;quot;, „התוכנה כותבת&amp;quot;. לא „היא חושבת&amp;quot;, לא „היא יודעת&amp;quot; ולא „היא מבינה&amp;quot;. התלמידים לוקחים מילים כפשוטן (וגם המחוון, עמ׳ 6).&lt;br&gt;אורכי העמודות הומצאו להמחשה, ולכן אין עליהן מספרים. בהדמיה נבחרת תמיד המילה הסבירה ביותר. בפועל התוכנה לפעמים בוחרת מילה סבירה אחרת: על זה השקופית הבאה.&lt;br&gt;מקור: מחוון כשירויות בינה מלאכותית 2.0, על-יסודי, משרד החינוך (sources/), עמ׳ 6, תחום 1א: „כיצד פועלים כלי בינה מלאכותית (מודלי שפה, מחוללי תמונות וכו׳)? באופן מתמטי על ידי דגימה הסתברותית וחיזוי המילה הבאה בטקסט&amp;quot;, ו„להסביר שמודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם&amp;quot;. אומת גם מול Google, Machine Learning Crash Course, „Introduction to Large Language Models&amp;quot;.&lt;br&gt;">
@@ -681,6 +697,16 @@ ul.clean li+li{margin-top:20px}
     <div class="pane rv"><div class="bars pn on"><div class="br top"><b>שלוליות</b><span><i style="--w:88%"></i></span></div><div class="br"><b>קשת</b><span><i style="--w:52%"></i></span></div><div class="br"><b>בוץ</b><span><i style="--w:34%"></i></span></div><div class="br"><b>חול</b><span><i style="--w:5%"></i></span></div></div><p class="pnote">אורך העמודה: כמה סביר שהמילה תבוא. להמחשה.</p></div>
   </div>
   <p class="concl rv">יש כמה מילים סבירות, והתוכנה בוחרת מתוכן. לכן אותה שאלה יכולה לקבל תשובות שונות.</p>
+</section>
+
+<section data-min="3" data-ch="a" data-sec="עכשיו אתם התוכנה" data-title="התוכנה היא לא אדם" class="s" data-notes="&lt;b&gt;התוכנה היא לא אדם&lt;/b&gt;שקופית קלה, עם הומור (יניב, 22.11). כל לחיצה מוסיפה שורה. לשאול לפני כל לחיצה: „מי מהשניים עושה את זה?&amp;quot;&lt;br&gt;&lt;ul&gt;&lt;li&gt;אוכל פלאפל, ישן בלילה: ברור. זה החלק המצחיק.&lt;/li&gt;&lt;li&gt;נעלב כשמתקנים אותו: לתוכנה אין רגשות. מותר לכתוב לה „טעית&amp;quot;. זה גם מכין את שיעור 2 (הסכמה עם השואל).&lt;/li&gt;&lt;li&gt;כותב מילה אחרי מילה: את זה שניהם עושים. בגלל זה הטקסט של התוכנה נשמע כמו של אדם.&lt;/li&gt;&lt;/ul&gt;⚠️ ההומור כאן מילולי ולא אירוני: כל שורה נכונה כפשוטה. לא להוסיף בדיחות שתלויות בטון.&lt;br&gt;המחוון, עמ׳ 6: „להסביר שמודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם… לחקות שיחה אנושית&amp;quot;.&lt;br&gt;הציור: אדם ומחשב פשוטים, בלי פרצוף על המחשב, כדי לא לרמוז שיש בו מישהו.&lt;br&gt;">
+  <p class="eyebrow anim">רגע, מי זה?</p>
+  <h2 class="ttl t-md anim">התוכנה היא לא אדם</h2>
+  <div class="np mt">
+    <div class="np-h"><span></span><span class="np-fig"><svg viewBox="0 0 200 230" width="190"><circle cx="100" cy="52" r="34" fill="#FFD7A8"/><circle cx="88" cy="48" r="4" fill="#1B2433"/><circle cx="112" cy="48" r="4" fill="#1B2433"/><path d="M86 64 Q100 76 114 64" stroke="#1B2433" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="56" y="94" width="88" height="96" rx="30" fill="#5AA9E6"/><rect x="66" y="186" width="22" height="40" rx="9" fill="#1B3050"/><rect x="112" y="186" width="22" height="40" rx="9" fill="#1B3050"/></svg><b>אדם</b></span><span class="np-fig"><svg viewBox="0 0 200 230" width="190"><rect x="18" y="24" width="164" height="136" rx="14" fill="#1B3050" stroke="#8EC5FF" stroke-width="4"/><rect x="34" y="44" width="96" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="48" y="66" width="78" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="34" y="88" width="60" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="48" y="110" width="96" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="34" y="132" width="78" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="146" y="132" width="6" height="16" fill="#8EC5FF"><animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/></rect><rect x="70" y="160" width="60" height="22" fill="#1B3050"/><rect x="40" y="182" width="120" height="14" rx="7" fill="#1B3050" stroke="#8EC5FF" stroke-width="3"/></svg><b>תוכנה</b></span></div>
+    <div class="np-r frag"><span class="np-t">אוכל פלאפל</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">ישן בלילה</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">נעלב כשמתקנים אותו</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">כותב מילה אחרי מילה</span><span class="np-m y">✓</span><span class="np-m y">✓</span></div>
+  </div>
+  <p class="frag concl">התוכנה כותבת כמו אדם, כי היא למדה מטקסטים שאנשים כתבו. אבל אין לה גוף, ואין לה רגשות.</p>
 </section>
 
 <section data-min="5" data-ch="a" data-sec="חיפוש מול צ׳אט" data-title="חיפוש מול צ׳אט" class="s" data-notes="&lt;b&gt;חיפוש מול צ׳אט&lt;/b&gt;מה רואים: אותה שאלה בשני כלים. המסכים מצוירים, לא צילום של אתר מסוים. שמות האתרים בחיפוש — דוגמה.&lt;br&gt;&lt;ul&gt;&lt;li&gt;לחיצה 1: בחיפוש — מי כתב כל דף. בוחרים בעצמנו מאיפה לקרוא, ויש לנו במה לבדוק.&lt;/li&gt;&lt;li&gt;לחיצה 2: בצ׳אט — פסקה אחת. התוכנה כתבה אותה עכשיו, בדרך שראינו בשקופית „התוכנה כותבת מילה אחרי מילה&amp;quot;.&lt;/li&gt;&lt;li&gt;לחיצה 3: המסקנה.&lt;/li&gt;&lt;/ul&gt;דיוק: יש צ׳אטים שמראים קישורים למקורות (גם Gemini, לפעמים). לכן „לא תמיד&amp;quot;, ולא „אף פעם&amp;quot;.&lt;br&gt;על מה שעומד מאחורי סדר התוצאות בחיפוש (מודעות ממומנות, אתרים שנבנו לעלות ראשונים) — בשיעור נפרד. המחוון, תחום 1ג: „הכוחות והאינטרסים מאחורי טכנולוגיית הבינה המלאכותית&amp;quot; (עמ׳ 7–8).&lt;br&gt;⏸ נקודת עצירה אם השיעור מתפרס על שתי שעות.&lt;br&gt;">
@@ -755,6 +781,16 @@ ul.clean li+li{margin-top:20px}
     </div>
   </div>
   <p class="frag concl">ברוב הפעמים התוכנה צודקת. אבל אי אפשר לדעת מראש מתי לא.</p>
+</section>
+
+<section data-min="12" data-ch="b" data-sec="עבודה בזוגות" data-title="עבודה בזוגות" class="s" data-notes="&lt;b&gt;משימה בזוגות: עכשיו אתם בודקים&lt;/b&gt;בזוגות, מכשיר אחד לזוג, Gemini בחשבון של משרד החינוך. 10 דקות.&lt;br&gt;⚠️ רק אחרי אישור הורים (הנחיות משרד החינוך, ינואר 2026). בלי אישור: המשימה עוברת לשיעור הבא, או שהמורה שואל על המקרן והזוגות בודקים במחברת.&lt;br&gt;&lt;ul&gt;&lt;li&gt;השאלות קבועות ומודפסות. לא „שאלו מה שבא לכם&amp;quot;: משימה פתוחה נתקעת.&lt;/li&gt;&lt;li&gt;לנסות את השאלות ב-Gemini יום לפני, ולהשאיר את אלה שיצאו מעניינות.&lt;/li&gt;&lt;li&gt;„ברברים&amp;quot;: ב-ר-ב-ר-י-ם, האות ר׳ פעמיים. תוכנות טועות לפעמים בספירת אותיות, כי הן בוחרות מילים ולא סופרות אותיות.&lt;/li&gt;&lt;li&gt;אם כל הזוגות קיבלו תשובה נכונה: גם זה תוצאה. „ברוב הפעמים התוכנה צודקת&amp;quot; — ובכל זאת בדקנו, ועכשיו אנחנו יודעים.&lt;/li&gt;&lt;li&gt;אם זוגות קיבלו תשובות שונות: זו המסקנה של „עכשיו אתם התוכנה&amp;quot;. התוכנה בוחרת מתוך כמה מילים סבירות.&lt;/li&gt;&lt;/ul&gt;המחוון, תחום 2ב: „הצלבות מידע מול מקורות חיצוניים&amp;quot; (עמ׳ 9).&lt;br&gt;">
+  <p class="eyebrow anim">עבודה בזוגות, 10 דקות</p>
+  <h2 class="ttl t-md anim">עכשיו אתם בודקים</h2>
+  <div class="task mt">
+    <ol class="steps"><li class="frag">שאלו את Gemini שאלה אחת מהרשימה.</li><li class="frag">כתבו במחברת מה Gemini ענה.</li><li class="frag">בדקו בעצמכם: סופרים, או מחפשים בספר.</li><li class="frag">סמנו ✓ או ✗.</li></ol>
+    <div class="qlist frag"><p class="lab">השאלות</p><p>כמה פעמים מופיעה האות ר׳ במילה „ברברים"?</p><p>כמה רגליים יש לעכביש?</p><p>באיזו טמפרטורה מים רותחים?</p></div>
+  </div>
+  <p class="frag concl">בסוף: כל זוג אומר בקול תשובה אחת. האם כולם קיבלו אותה תשובה?</p>
 </section>
 
 <section data-min="2" data-ch="open" data-sec="הכלל" data-title="הכלל" class="s s--center" data-notes="&lt;b&gt;הכלל של היחידה&lt;/b&gt;הכלל הזה חוזר בתחילת כל שיעור ביחידה.&lt;br&gt;לשאול: „איפה בדקנו היום?&amp;quot; (ספר הלימוד, אתר של סוכנות חלל, ספירה בעצמנו.)&lt;br&gt;">
