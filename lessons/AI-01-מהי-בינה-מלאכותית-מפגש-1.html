@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>בינה מלאכותית, שיעור 1: מה היא ומה היא יודעת לעשות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&display=block" rel="stylesheet">
+<style>
+/* מנוע המצגות של „מהכביש לחלל” (deck.css) — עותק. הגופן Assistant נטען מ־Google Fonts במקום מקבצים מקומיים. */
+
+:root{
+  --bg:#04060C; --bg2:#0A0F1C; --panel:rgba(255,255,255,.055); --panel2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.14); --line2:rgba(255,255,255,.26);
+  --ink:#FFFFFF; --text:#DDE4F0; --muted:#9BA8C0;
+  --ac:#8EC5FF; --ac-rgb:142,197,255;
+  --ok:#3DDC97; --no:#FF5C6C; --warn:#FFC24B;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;
+}
+/* one accent per lesson, so each lesson has its own colour on the same dark stage */
+body.l1{--ac:#8EC5FF;--ac-rgb:142,197,255}   /* moon: ice blue */
+body.l2{--ac:#FFB020;--ac-rgb:255,176,32}    /* rockets: flame */
+body.l3{--ac:#2EE6C5;--ac-rgb:46,230,197}    /* stations: aurora */
+body.l4{--ac:#FF6A4A;--ac-rgb:255,106,74}    /* mars: rust */
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0}
+body{
+  background:#000;color:var(--text);overflow:hidden;
+  font-family:'Assistant',system-ui,'Segoe UI',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:var(--ac)}
+.mono{font-family:var(--mono);direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+/* ============ STAGE ============ */
+/* centred with absolute positioning, not with grid: in a right-to-left page a grid item wider than the
+   window is pushed to the left instead of being centred, which cut the slide when the window was under 1280px */
+#stage{position:fixed;inset:0;background:#000;overflow:hidden}
+#deck{
+  position:absolute;left:50%;top:50%;margin:-360px 0 0 -640px;width:1280px;height:720px;
+  transform-origin:center center;background:var(--bg);overflow:hidden;
+}
+/* star field: three layers of dots at different sizes, plus a faint glow in the lesson colour */
+#deck::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(1.2px 1.2px at 12% 18%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 27% 72%,#cfe0ff 50%,transparent 51%),
+    radial-gradient(1.4px 1.4px at 41% 33%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 58% 84%,#fff 50%,transparent 51%),
+    radial-gradient(1.2px 1.2px at 66% 12%,#ffe9c9 50%,transparent 51%),
+    radial-gradient(1px 1px at 79% 57%,#fff 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 91% 27%,#cfe0ff 50%,transparent 51%),
+    radial-gradient(1px 1px at 6% 61%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 35% 9%,#fff 50%,transparent 51%),
+    radial-gradient(1.2px 1.2px at 49% 60%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 73% 91%,#fff 50%,transparent 51%),
+    radial-gradient(1px 1px at 87% 74%,#ffe9c9 50%,transparent 51%),
+    radial-gradient(1px 1px at 19% 43%,#fff 50%,transparent 51%),
+    radial-gradient(1.3px 1.3px at 96% 48%,#fff 50%,transparent 51%),
+    radial-gradient(900px 520px at 100% 0%,rgba(var(--ac-rgb),.13),transparent 62%),
+    radial-gradient(700px 500px at 0% 100%,rgba(60,90,200,.12),transparent 60%);
+  opacity:.9}
+
+/* a planet limb in the lesson colour, bottom left, so plain slides are not an empty black field */
+#deck::after{content:'';position:absolute;z-index:0;left:-300px;bottom:-470px;width:800px;height:800px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 64% 26%,rgba(var(--ac-rgb),.30),rgba(var(--ac-rgb),.09) 44%,rgba(var(--ac-rgb),.02) 70%);
+  box-shadow:inset 0 0 0 1px rgba(var(--ac-rgb),.28),0 0 140px rgba(var(--ac-rgb),.16)}
+
+/* ============ SLIDE ============ */
+.s{
+  position:absolute;inset:0;z-index:1;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:92px 84px 60px;
+  opacity:0;visibility:hidden;
+  transition:opacity .4s ease, visibility .4s;
+  overflow:hidden;
+}
+.s>*{position:relative;z-index:2}
+.s.on{opacity:1;visibility:visible}
+/* entrance uses transitions, never keyframes: the resting state is always visible */
+.anim{opacity:0;transform:translateY(16px);
+  transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1)}
+.s.on .anim{opacity:1;transform:none}
+.s.on .anim:nth-child(2){transition-delay:.06s}
+.s.on .anim:nth-child(3){transition-delay:.12s}
+.s.on .anim:nth-child(4){transition-delay:.18s}
+.s.on .anim:nth-child(5){transition-delay:.24s}
+.s.on .anim:nth-child(6){transition-delay:.30s}
+.s.on .anim:nth-child(7){transition-delay:.36s}
+/* fragments: revealed one by one with the same key that advances */
+.frag{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease}
+.frag.show{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){ .anim,.frag{transition:none} }
+.s--center{align-items:center;text-align:center}
+
+/* full bleed photo slides. Hebrew text sits on the right, so the scrim is darkest there */
+.s .bg{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;z-index:0}
+.s--photo::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(270deg,rgba(4,6,12,.94) 0%,rgba(4,6,12,.82) 38%,rgba(4,6,12,.30) 72%,rgba(4,6,12,.10) 100%)}
+.s--photo.dim::after{background:rgba(4,6,12,.72)}
+.s--photo.low::after{background:linear-gradient(0deg,rgba(4,6,12,.95) 0%,rgba(4,6,12,.72) 34%,rgba(4,6,12,.12) 70%,rgba(4,6,12,.30) 100%)}
+.s--photo.low{justify-content:flex-end;padding-bottom:70px}
+.s--photo .half{max-width:660px}
+/* title on top, answers at the bottom, the photo left clear in the middle */
+.s--photo.tb{justify-content:space-between;padding-top:64px;padding-bottom:62px}
+.s--photo.tb::after{background:linear-gradient(0deg,rgba(4,6,12,.92) 0%,rgba(4,6,12,.55) 22%,rgba(4,6,12,0) 40%,rgba(4,6,12,0) 62%,rgba(4,6,12,.70) 84%,rgba(4,6,12,.90) 100%)}
+.credit{position:absolute!important;z-index:3;bottom:18px;right:84px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.62);direction:rtl}
+
+/* a full bleed clip that plays on its own when the slide opens */
+.s--clip{padding:0}
+.s--clip video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+
+/* ============ TYPE ============ */
+.ttl{font-weight:800;line-height:1.06;margin:0;color:var(--ink);letter-spacing:-.02em}
+.t-xl{font-size:98px}
+.t-lg{font-size:64px}
+.t-md{font-size:50px}
+.t-sm{font-size:40px}
+.hl{color:var(--ac)}
+.eyebrow{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:700;color:var(--ac);margin:0 0 16px;letter-spacing:.02em}
+.eyebrow::before{content:'';width:30px;height:2px;background:var(--ac);flex:0 0 auto}
+.s--center .eyebrow{justify-content:center}
+.eyebrow.stop{color:var(--warn)}
+.eyebrow.stop::before{background:var(--warn);width:10px;height:10px;border-radius:50%}
+p{margin:0;font-size:27px;line-height:1.55;font-weight:400;color:var(--text)}
+.lede{font-size:32px;line-height:1.45;font-weight:500;color:#EEF2F9}
+.sm{font-size:21px;line-height:1.55;color:var(--muted)}
+strong{font-weight:800;color:var(--ink)}
+.punch{font-weight:800;font-size:40px;line-height:1.25;color:var(--ac);letter-spacing:-.01em}
+.rule{width:120px;height:3px;border-radius:2px;background:linear-gradient(to left,var(--ac),transparent);margin:26px 0}
+.s--center .rule{margin-inline:auto;background:linear-gradient(to left,transparent,var(--ac),transparent)}
+
+/* ============ LISTS ============ */
+ul.clean{list-style:none;margin:0;padding:0}
+ul.clean li{position:relative;padding-inline-start:30px;font-size:25px;line-height:1.5;color:var(--text)}
+ul.clean li+li{margin-top:13px}
+ul.clean li::before{content:'';position:absolute;inset-inline-start:4px;top:.66em;width:9px;height:9px;background:var(--ac);border-radius:50%;
+  box-shadow:0 0 12px rgba(var(--ac-rgb),.9)}
+
+/* ============ CARDS ============ */
+.cards{display:grid;gap:18px;width:100%}
+.c5{grid-template-columns:repeat(5,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 22px 24px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.card h3{font-weight:800;font-size:28px;margin:0 0 8px;color:var(--ink);line-height:1.15;letter-spacing:-.01em}
+.card p{font-size:20.5px;line-height:1.5}
+.idx{display:block;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--ac);margin-bottom:10px;direction:ltr;text-align:end}
+.card--ac{border-top:3px solid var(--ac)}
+.card--ok{border-top:3px solid var(--ok)}
+.card--no{border-top:3px solid var(--no)}
+.card--warn{border-top:3px solid var(--warn)}
+.card.pic{padding:0;overflow:hidden}
+.card.pic img{width:100%;height:150px;object-fit:cover}
+.card.pic .in{padding:16px 20px 20px}
+.card.pic h3{font-size:25px}
+.card.pic p{font-size:19px}
+.tag{display:inline-block;font-size:15px;font-weight:800;border-radius:999px;padding:3px 13px;margin-bottom:10px;letter-spacing:.02em}
+.tag.ok{background:rgba(61,220,151,.16);color:var(--ok);border:1px solid rgba(61,220,151,.4)}
+.tag.no{background:rgba(255,92,108,.14);color:var(--no);border:1px solid rgba(255,92,108,.4)}
+.tag.warn{background:rgba(255,194,75,.14);color:var(--warn);border:1px solid rgba(255,194,75,.4)}
+.tag.ac{background:rgba(var(--ac-rgb),.14);color:var(--ac);border:1px solid rgba(var(--ac-rgb),.4)}
+
+/* ============ LAYOUT HELPERS ============ */
+.split{display:grid;grid-template-columns:1.08fr .92fr;gap:46px;align-items:center;width:100%}
+.split--even{grid-template-columns:1fr 1fr}
+.split--vid{grid-template-columns:.78fr 1.22fr}
+.stack>*+*{margin-top:18px}
+.mt{margin-top:26px}
+.mt-s{margin-top:14px}
+
+/* ============ COVER ============ */
+.s--cover{padding:70px 84px 60px;justify-content:flex-end}
+.s--cover::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(0deg,rgba(4,6,12,.96) 0%,rgba(4,6,12,.70) 36%,rgba(4,6,12,.12) 68%,rgba(4,6,12,.38) 100%)}
+.cover__brand{position:absolute!important;top:44px;right:84px;display:flex;align-items:center;gap:14px}
+.cover__brand img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:50%;padding:3px}
+.cover__brand span{font-size:16px;font-weight:700;color:#fff;line-height:1.35;text-shadow:0 1px 10px rgba(0,0,0,.8)}
+.cover__n{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:.3em;color:var(--ac);direction:ltr;text-align:end;margin-bottom:10px}
+.cover__sub{font-size:31px;font-weight:500;color:#EEF2F9;margin-top:14px;max-width:880px;line-height:1.4}
+.byline{display:flex;align-items:center;gap:14px;margin-top:28px;font-size:23px;font-weight:800;color:#fff}
+.byline::before{content:'';width:34px;height:3px;border-radius:2px;background:var(--ac)}
+
+/* ============ SECTION OPENER ============ */
+.sec__n{font-family:var(--mono);font-size:170px;font-weight:800;line-height:.9;color:transparent;
+  -webkit-text-stroke:2px var(--ac);letter-spacing:-.04em;margin-bottom:10px;text-align:end;direction:ltr;display:block;width:100%;
+  filter:drop-shadow(0 0 22px rgba(var(--ac-rgb),.45))}
+
+/* ============ STATS ============ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%}
+.stats.two{grid-template-columns:1fr 1fr}
+.stats.four{grid-template-columns:repeat(4,1fr)}
+.stat{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--panel)}
+.stat .n{display:block;font-family:var(--mono);font-weight:800;font-size:58px;line-height:1;color:var(--ac);letter-spacing:-.03em;text-align:start;direction:rtl;
+  text-shadow:0 0 26px rgba(var(--ac-rgb),.45)}
+.stat .n small{font-family:'Assistant',sans-serif;font-size:.42em;font-weight:800;letter-spacing:0;margin-inline-start:10px;color:#fff}
+.stat .l{display:block;margin-top:11px;font-size:20px;font-weight:600;color:var(--text);line-height:1.3}
+.big{font-family:var(--mono);font-weight:800;font-size:200px;line-height:.95;color:var(--ac);letter-spacing:-.04em;direction:rtl;
+  text-shadow:0 0 60px rgba(var(--ac-rgb),.5)}
+.big small{font-family:'Assistant',sans-serif;font-size:.26em;font-weight:800;color:#fff;letter-spacing:0;margin-inline-start:18px}
+
+/* ============ BARS, for comparisons ============ */
+.bars{display:grid;gap:14px;width:100%}
+.bar{display:grid;grid-template-columns:220px 1fr 150px;gap:16px;align-items:center;font-size:22px}
+.bar b{font-weight:800;color:var(--ink);text-align:start}
+.bar i{display:block;height:26px;border-radius:13px;background:linear-gradient(to left,var(--ac),rgba(var(--ac-rgb),.35));width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1);justify-self:start;
+  box-shadow:0 0 22px rgba(var(--ac-rgb),.35)}
+.s.on .bar i{width:var(--w)}
+.bar span{font-family:var(--mono);font-weight:800;color:var(--ac);direction:ltr;text-align:start;font-size:21px}
+.bar.dimmed i{background:rgba(255,255,255,.28);box-shadow:none}
+.bar.dimmed span{color:var(--text)}
+
+/* ============ TIMELINE ============ */
+.tl{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:0;position:relative;width:100%;margin-top:30px}
+.tl::before{content:'';position:absolute;top:13px;inset-inline:4%;height:2px;background:linear-gradient(to left,rgba(var(--ac-rgb),.2),var(--ac),rgba(var(--ac-rgb),.2))}
+.tl div{text-align:center;padding:0 10px;position:relative}
+.tl i{display:block;width:28px;height:28px;border-radius:50%;background:var(--bg);border:3px solid var(--ac);margin:0 auto 14px;box-shadow:0 0 18px rgba(var(--ac-rgb),.7)}
+.tl i.no{border-color:var(--no);box-shadow:0 0 18px rgba(255,92,108,.6)}
+.tl i.ok{border-color:var(--ok);box-shadow:0 0 18px rgba(61,220,151,.6)}
+.tl i.soon{border-style:dashed;box-shadow:none}
+.tl em{display:block;font-style:normal;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--ac);direction:ltr}
+.tl b{display:block;font-size:23px;font-weight:800;color:var(--ink);line-height:1.2;margin-top:4px}
+.tl span{display:block;font-size:18px;color:var(--muted);margin-top:5px;line-height:1.35}
+
+/* a row of numbered dots, one per test flight */
+.dots{display:grid;grid-template-columns:repeat(14,1fr);gap:10px;width:100%;direction:ltr}
+.dots i{display:grid;place-items:center;aspect-ratio:1/1;border-radius:50%;font-style:normal;font-family:var(--mono);font-size:22px;font-weight:800;
+  color:var(--ok);border:3px solid var(--ok);background:rgba(61,220,151,.10)}
+.dots i.no{color:var(--no);border-color:var(--no);background:rgba(255,92,108,.12)}
+.dots i.star{color:#04060C;background:var(--ok);box-shadow:0 0 26px rgba(61,220,151,.7)}
+
+/* ============ TABLE ============ */
+.tbl{width:100%;border-collapse:collapse;font-size:22px}
+.tbl th,.tbl td{padding:12px 16px;text-align:start;border-bottom:1px solid var(--line)}
+.tbl thead th{font-size:16px;font-weight:700;color:var(--muted);letter-spacing:.02em;border-bottom:2px solid var(--ac)}
+.tbl tbody th{font-weight:800;color:var(--ink)}
+.tbl td.num{font-family:var(--mono);direction:ltr;text-align:end;font-weight:700;color:var(--ac)}
+
+/* ============ VIDEO ============ */
+.yt{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--line2);background:#000;cursor:pointer;width:100%;
+  box-shadow:0 0 0 1px rgba(var(--ac-rgb),.25),0 30px 80px -30px rgba(var(--ac-rgb),.45)}
+.yt img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.yt__play{position:absolute;inset:0;margin:auto;width:84px;height:84px;border-radius:50%;background:rgba(var(--ac-rgb),.95);
+  box-shadow:0 0 0 10px rgba(var(--ac-rgb),.2),0 10px 40px -6px rgba(0,0,0,.8)}
+.yt__play::after{content:'';position:absolute;top:50%;left:54%;transform:translate(-50%,-50%);
+  border-style:solid;border-width:16px 0 16px 27px;border-color:transparent transparent transparent #04060C}
+.yt__lbl{position:absolute;bottom:12px;inset-inline-start:12px;background:rgba(4,6,12,.82);color:#fff;
+  font-size:15px;font-weight:700;border-radius:8px;padding:5px 12px;border:1px solid var(--line)}
+.s--video{padding:84px 84px 44px;align-items:center}
+.s--video .yt{width:auto;height:468px;max-width:100%}
+.s--video .vhead{display:flex;align-items:baseline;justify-content:space-between;gap:24px;width:832px;max-width:100%;margin-bottom:14px}
+.s--video .vhead h2{margin:0;font-size:34px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.s--video .vhead span{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--ac);direction:ltr;white-space:nowrap}
+.watch{width:832px;max-width:100%;margin-top:14px;font-size:21px;line-height:1.45;color:var(--text);border-inline-start:3px solid var(--ac);padding-inline-start:16px;text-align:start}
+.watch b{color:var(--ac);font-weight:800}
+.cap{margin-top:9px;font-size:14.5px;font-weight:600;color:var(--muted);line-height:1.4}
+.frame{border-radius:14px;overflow:hidden;border:1px solid var(--line2);background:#000;position:relative}
+.frame img{width:100%;display:block;object-fit:cover}
+.frame.tall img{height:520px}
+.frame.sq img{aspect-ratio:1/1}
+.frame figcaption,.frame .fc{position:absolute;bottom:0;inset-inline:0;padding:26px 16px 10px;font-size:14px;font-weight:600;color:rgba(255,255,255,.85);
+  background:linear-gradient(0deg,rgba(4,6,12,.9),transparent)}
+
+/* "and what has not happened yet" box: every claim gets its limit */
+.limit{border:1px solid rgba(255,194,75,.45);background:rgba(255,194,75,.09);border-radius:12px;padding:12px 18px;font-size:20px;line-height:1.45;color:#FFE3A6}
+.limit b{color:var(--warn);font-weight:800}
+
+/* ============ QUIZ: true or false ============ */
+.quiz{display:grid;gap:12px;width:100%}
+.q{display:grid;grid-template-columns:1fr 170px;gap:16px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:13px 20px;background:var(--panel)}
+.q p{font-size:24px;line-height:1.4}
+.q .a{font-size:19px;font-weight:800;border-radius:10px;padding:8px 10px;text-align:center}
+.q .a.t{background:rgba(61,220,151,.16);color:var(--ok);border:1px solid rgba(61,220,151,.45)}
+.q .a.f{background:rgba(255,92,108,.14);color:var(--no);border:1px solid rgba(255,92,108,.45)}
+.q .a.w{background:rgba(255,194,75,.14);color:var(--warn);border:1px solid rgba(255,194,75,.45)}
+.quiz.two{grid-template-columns:1fr 1fr}
+.quiz.two .q{grid-template-columns:1fr 150px;padding:12px 16px}
+.quiz.two .q p{font-size:22px}
+.quiz.two .q .a{font-size:17.5px}
+.q .why{grid-column:1/-1;font-size:18.5px;color:var(--muted);line-height:1.4;margin-top:-4px}
+
+/* ============ MULTIPLE CHOICE, clickable on the board ============ */
+.mcq{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
+.mcq.one{grid-template-columns:1fr}
+.mcq.sm button{font-size:22px;padding:12px 18px}
+.mcq.sm button i{width:34px;height:34px;font-size:16px}
+.mcq.four{grid-template-columns:repeat(4,1fr)}
+.mcq.four button{font-size:21px;padding:14px 14px;gap:12px}
+.mcq.four button i{width:34px;height:34px;font-size:16px}
+.mcq button{font:inherit;text-align:start;cursor:pointer;display:flex;align-items:center;gap:16px;
+  border:1px solid var(--line2);border-radius:14px;background:var(--panel);color:var(--ink);padding:16px 20px;font-size:26px;font-weight:700;line-height:1.3;
+  transition:background .2s,border-color .2s,transform .2s,opacity .3s}
+.mcq button:hover{background:var(--panel2);border-color:var(--ac)}
+.mcq button i{flex:0 0 auto;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:2px solid var(--ac);color:var(--ac);
+  font-style:normal;font-family:var(--mono);font-size:18px;font-weight:800}
+.mcq button.wrong{border-color:var(--no);background:rgba(255,92,108,.12);opacity:.55}
+.mcq button.wrong i{border-color:var(--no);color:var(--no)}
+.mcq.done button:not(.right){opacity:.4}
+.mcq.done button.right{border-color:var(--ok);background:rgba(61,220,151,.16);opacity:1;transform:scale(1.02)}
+.mcq.done button.right i{border-color:var(--ok);background:var(--ok);color:#04060C}
+.explain{font-size:23px;line-height:1.45;color:var(--text);border-inline-start:3px solid var(--ok);padding-inline-start:16px}
+
+/* ============ GUESS: a number hidden until revealed ============ */
+.guess{display:flex;align-items:baseline;justify-content:center;gap:18px}
+.guess .big{transition:filter .5s,opacity .5s}
+
+/* ============ MISSION: an activity that runs on the board or on student devices ============ */
+.s--mission{padding-top:96px}
+.mission{display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:center;width:100%}
+.mission__n{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:17px;font-weight:800;letter-spacing:.24em;color:#04060C;background:var(--ac);
+  border-radius:8px;padding:6px 14px;direction:ltr;margin-bottom:16px}
+.mission ol{margin:20px 0 0;padding:0;list-style:none;counter-reset:m}
+.mission ol li{counter-increment:m;position:relative;padding-inline-start:46px;font-size:24px;line-height:1.45;color:var(--text)}
+.mission ol li+li{margin-top:11px}
+.mission ol li::before{content:counter(m);position:absolute;inset-inline-start:0;top:2px;width:31px;height:31px;border-radius:50%;
+  border:2px solid var(--ac);color:var(--ac);font-family:var(--mono);font-size:15px;font-weight:800;display:grid;place-items:center}
+.mission__side{display:grid;gap:12px;justify-items:center;text-align:center}
+.qr{background:#fff;border-radius:14px;padding:12px;width:210px;height:210px}
+.qr img{width:100%;height:100%;image-rendering:pixelated}
+.short{font-family:var(--mono);font-size:18px;font-weight:800;color:#fff;direction:ltr;letter-spacing:0;white-space:nowrap}
+.short b{color:var(--ac)}
+.btn{font:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:12px;padding:12px 22px;font-size:20px;font-weight:800;
+  background:var(--ac);color:#04060C;border:0;text-decoration:none;transition:transform .15s,box-shadow .15s;box-shadow:0 0 30px -6px rgba(var(--ac-rgb),.8)}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--ac);border:2px solid var(--ac);box-shadow:none}
+.timer{font-family:var(--mono);font-size:40px;font-weight:800;color:#fff;direction:ltr;cursor:pointer;border:1px solid var(--line2);border-radius:12px;padding:6px 18px;
+  background:var(--panel);user-select:none;min-width:150px;text-align:center}
+.timer.run{color:var(--ac);border-color:var(--ac)}
+.timer.end{color:var(--no);border-color:var(--no);animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.timer small{display:block;font-family:'Assistant',sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0;direction:rtl}
+
+/* sources */
+.src{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:16.5px;line-height:1.45}
+.src dt{font-weight:800;color:var(--ink);white-space:nowrap}
+.src dd{margin:0;color:var(--text)}
+
+/* ============ CHROME ============ */
+#chrome{position:absolute;top:0;inset-inline:0;height:62px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 84px;z-index:5;pointer-events:none;transition:opacity .3s}
+#chrome::after{content:'';position:absolute;inset-inline:84px;bottom:0;height:1px;background:var(--line)}
+#deck.nochrome #chrome{opacity:0}
+.ch__sec{display:flex;align-items:center;gap:12px;font-size:15.5px;font-weight:700;color:var(--muted)}
+.ch__sec i{width:8px;height:8px;border-radius:50%;background:var(--ac);box-shadow:0 0 12px var(--ac)}
+.ch__r{display:flex;align-items:center;gap:16px}
+.ch__lesson{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.2em;color:var(--muted);direction:ltr}
+.ch__logo{width:30px;height:30px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
+#num{position:absolute;bottom:20px;left:84px;z-index:5;font-size:12px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.1em}
+#hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;font-weight:600;color:rgba(255,255,255,.6);opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#deck.cover-on #hint{opacity:1}
+#bar{position:fixed;top:0;inset-inline:0;height:3px;background:rgba(255,255,255,.08);z-index:40}
+#bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .3s ease;box-shadow:0 0 12px var(--ac)}
+kbd{background:rgba(255,255,255,.1);border:1px solid var(--line2);border-bottom-width:2px;border-radius:6px;padding:1px 8px;font-family:inherit;font-size:13px;font-weight:700;color:#fff}
+
+/* speaker notes */
+#notes{position:fixed;inset-inline:0;bottom:0;z-index:50;background:#0B1120;color:var(--text);border-top:3px solid var(--ac);
+  padding:16px 30px 20px;height:30vh;overflow:auto;display:none;font-size:16.5px;line-height:1.62}
+#notes.on{display:block}
+#notes b{color:var(--ac);display:block;margin-bottom:6px;font-size:14px;letter-spacing:.04em}
+#notes li b{display:inline;color:#fff;font-size:inherit;letter-spacing:0}
+#notes ul{margin:6px 0 0;padding-inline-start:20px}
+#notes li{margin-bottom:4px}
+
+/* overview */
+#ov{position:fixed;inset:0;z-index:60;background:#070B14;padding:34px;overflow:auto;display:none}
+#ov.on{display:block}
+#ov h4{color:#fff;font-weight:800;font-size:30px;margin:0 0 22px;text-align:center}
+#ovg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;max-width:1500px;margin-inline:auto}
+.ovc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;color:var(--text);
+  font-size:15px;font-weight:600;line-height:1.4;min-height:70px;text-align:start;transition:border-color .15s,background .15s}
+.ovc:hover{border-color:var(--ac);background:var(--panel2)}
+.ovc.cur{border-color:var(--ac);background:rgba(var(--ac-rgb),.14)}
+.ovc b{display:block;font-family:var(--mono);color:var(--ac);font-size:12px;margin-bottom:5px;direction:ltr;text-align:end}
+.ovc em{display:block;margin-top:6px;font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.ovc.skip{border-style:dashed}
+
+/* help */
+#help{position:fixed;inset:0;z-index:70;background:rgba(4,6,12,.97);display:none;place-items:center;color:var(--text)}
+#help.on{display:grid}
+#help div{max-width:600px;font-size:19px;line-height:2.05}
+#help h4{font-weight:800;font-size:36px;color:#fff;margin:0 0 14px}
+#help kbd{font-size:16px;padding:2px 9px}
+
+/* activity overlay: the same mission page the students open, shown on the board */
+#act{position:fixed;inset:0;z-index:75;background:rgba(4,6,12,.96);display:none;padding:18px 18px 18px}
+#act.on{display:block}
+#act iframe{width:100%;height:100%;border:1px solid var(--line2);border-radius:14px;background:var(--bg)}
+#act button{position:absolute;top:28px;left:30px;z-index:2;font:inherit;font-size:17px;font-weight:800;cursor:pointer;border-radius:10px;padding:8px 18px;
+  background:#fff;color:#04060C;border:0}
+
+/* lesson guide, printable. White on purpose: it is a document for the teacher, not a slide */
+#guide{position:fixed;inset:0;z-index:80;background:#fff;overflow:auto;display:none;color:#2A3352}
+#guide.on{display:block}
+.g{max-width:860px;margin:0 auto;padding:34px 30px 60px}
+.g h1{font-size:34px;font-weight:800;color:#131555;margin:0 0 6px}
+.g__meta{font-size:17px;color:#667085;margin-bottom:22px;line-height:1.5}
+.g__bar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px}
+.g__bar button{font:inherit;font-size:16px;font-weight:700;border:1px solid #E4E8EF;background:#fff;color:#131555;border-radius:10px;padding:8px 18px;cursor:pointer}
+.g__bar button:first-child{background:#0A66E8;border-color:#0A66E8;color:#fff}
+.g ol{list-style:none;margin:0;padding:0}
+.g__it{border-top:1px solid #E4E8EF;padding:14px 0;break-inside:avoid}
+.g__h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.g__h .mono{font-size:13px;font-weight:700;color:#0A66E8}
+.g__h b{font-size:20px;font-weight:800;color:#131555}
+.g__h em{font-style:normal;font-size:14px;font-weight:700;color:#667085}
+.g__h i{font-style:normal;font-size:13px;font-weight:700;color:#B54708;background:#FFF4E5;border-radius:6px;padding:1px 8px}
+.g__n{font-size:16.5px;line-height:1.6;margin-top:6px;color:#2A3352}
+.g__n>b:first-child{display:none}
+.g__n b{color:#131555}
+.g__n ul{margin:6px 0 0;padding-inline-start:20px}
+@media print{
+  html,body{height:auto;overflow:visible;background:#fff}
+  #stage,#bar,#notes,#ov,#help,#act,.g__bar{display:none!important}
+  #guide{display:block!important;position:static;overflow:visible}
+  .g{padding:0;max-width:none}
+}
+
+/* שיעורי המדעים על מנוע „מהכביש לחלל”: צבע לכל חלק, נוסחאות, טבלה מחזורית ב־SVG, שאלות עם תשובה באותה שקופית. */
+
+/* ============ צבע לכל חלק של השיעור ============ */
+body{--ac:#FFB020;--ac-rgb:255,176,32}
+body[data-ch=open]{--ac:#FFB020;--ac-rgb:255,176,32}   /* פתיחה, חזרה וסגירה: להבה */
+body[data-ch=a]{--ac:#8EC5FF;--ac-rgb:142,197,255}     /* חלק א: כחול קרח */
+body[data-ch=b]{--ac:#2EE6C5;--ac-rgb:46,230,197}      /* חלק ב: זוהר צפוני */
+body[data-ch=ext]{--ac:#B49CFF;--ac-rgb:180,156,255}   /* הרחבה: סגול */
+#deck::before,#deck::after,#bar i,.ch__sec i{transition:background .6s,box-shadow .6s}
+
+/* ============ טקסט ============ */
+.f{direction:ltr;unicode-bidi:isolate;font-weight:800;white-space:nowrap}
+.quote{font-size:23px;line-height:1.5;color:var(--muted)}
+.quote b{color:var(--text)}
+.t-xs{font-size:34px}
+.lede .f,.ttl .f{color:inherit}
+.ttl em,.lede em{font-style:normal;color:var(--ac)}
+
+/* ============ שאלה ותשובה באותה שקופית ============ */
+/* frag.keep: השאלה גלויה מההתחלה; הלחיצה חושפת רק את .ans שבתוכה */
+.frag.keep{opacity:1;transform:none}
+.frag.keep .ans{opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease}
+.frag.keep.show .ans{opacity:1;transform:none}
+.qa{display:grid;gap:14px;width:100%}
+.qa>div{border:1px solid var(--line);border-radius:14px;padding:14px 20px;background:var(--panel);display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline}
+.qa i{font-style:normal;font-family:var(--mono);font-weight:800;font-size:20px;color:var(--ac);grid-row:span 2}
+.qa p{font-size:24px;line-height:1.45;color:var(--ink)}
+.qa .ans{font-size:22px;line-height:1.45;font-weight:700;color:var(--ok)}
+.tbl .ans{color:var(--ok);font-weight:800}
+.tbl td,.tbl th{padding:9px 14px}
+.tbl td.c,.tbl th.c{text-align:center}
+.tbl .giv{color:var(--ink);font-weight:700}
+
+/* ============ כותרת עם טיימר ============ */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;width:100%}
+.hdr .timer{flex:0 0 auto;font-size:32px}
+
+/* ============ איורים ============ */
+.art{display:flex;justify-content:center;align-items:center}
+.art svg{display:block;max-width:100%;height:auto}
+.figrow{display:flex;justify-content:center;align-items:flex-end;gap:34px}
+.fig{display:flex;flex-direction:column;align-items:center;gap:8px}
+.fig .lb{font-size:20px;font-weight:700;color:var(--muted)}
+.fig .lb .f{color:var(--ink);font-size:24px}
+svg .frag{transform-box:fill-box}
+/* פרטים בציור שנדלקים יחד עם שלב בטקסט: .tN בטקסט מדליק את .wN בציור */
+.w1,.w2,.w3,.w4,.w5,.w6{opacity:0;transition:opacity .45s ease}
+.s:has(.t1.show) .w1,.s:has(.t2.show) .w2,.s:has(.t3.show) .w3,
+.s:has(.t4.show) .w4,.s:has(.t5.show) .w5,.s:has(.t6.show) .w6{opacity:1}
+
+/* כפתורי בחירה עם ציור בתוכם */
+.mcq.pics button{flex-direction:column;justify-content:center;gap:6px;padding:12px 10px 14px}
+.mcq.pics button svg{width:120px;height:auto}
+.mcq.two button{justify-content:flex-start}
+
+/* מספר אטומי במשבצת הגדולה ובטבלה */
+.pt-z{font-family:var(--mono);font-weight:700}
+
+/* ============ בהיר יותר על הרקע הכהה, וגדול יותר (יניב, 27.10: „הרקע כהה אז השאר צריך להיות בהיר יותר”) ============ */
+:root{--panel:rgba(255,255,255,.085);--panel2:rgba(255,255,255,.13);--line:rgba(255,255,255,.24);--line2:rgba(255,255,255,.38);
+  --text:#EEF2F9;--muted:#C2CDDD}
+.card{background:rgba(255,255,255,.085)}
+.card h3{font-size:32px}
+.card p{font-size:24px}
+p{font-size:29px}
+.lede{font-size:34px}
+.quote{font-size:26px;color:#C9D3E3}
+ul.clean li{font-size:30px}
+ul.clean li+li{margin-top:20px}
+.qa p{font-size:30px}
+.qa .ans{font-size:28px}
+.explain{font-size:27px}
+.limit{font-size:24px}
+.tbl{font-size:27px}
+.tbl thead th{font-size:19px;color:#C9D3E3}
+.stat .l{font-size:23px}
+.fig .lb{font-size:23px;color:#DDE6F2}
+.mcq button{font-size:30px}
+.mcq.four button{font-size:26px}
+.tbl td,.tbl th{padding:7px 14px}
+
+/* הכיתובים בעברית (יניב, 27.10): בלי גופן ברוחב קבוע ובלי ריווח אותיות */
+.ch__lesson{font-family:inherit;direction:rtl;letter-spacing:.02em;font-size:16px;color:#C9D3E3}
+.cover__n{font-family:inherit;direction:rtl;text-align:start;letter-spacing:.02em;font-size:24px}
+
+/* בלי חלל (יניב, 27.10: „אני לא רוצה ציור של ירח ברקע. זה חלל, אנחנו בכימיה”): בלי כוכב הלכת ובלי הכוכבים, רק זוהר עדין בצבע החלק */
+#deck::after{display:none}
+#deck::before{background:radial-gradient(900px 520px at 100% 0%,rgba(var(--ac-rgb),.10),transparent 62%),
+  radial-gradient(700px 500px at 0% 100%,rgba(var(--ac-rgb),.06),transparent 60%);opacity:1}
+
+/* כימיה על שחור (יניב, 27.10: „השחור היה יפה יותר. הרשת מבלבלת את העין. הירח על הרקע השחור שבר את השחור עם ׳אור׳”):
+   הרקע השחור של המנוע, בלי כוכבים ובלי רשת. במקום הירח — מולקולה מוארת בפינה, בצבע החלק, עם הילה רכה סביבה */
+#deck::before{display:block;opacity:1;background:
+  radial-gradient(560px 520px at 9% 96%,rgba(var(--ac-rgb),.20),rgba(var(--ac-rgb),.06) 45%,transparent 72%),
+  radial-gradient(900px 520px at 100% 0%,rgba(var(--ac-rgb),.08),transparent 62%)}
+#deck::after{display:block;content:'';position:absolute;z-index:0;left:-130px;bottom:-190px;width:430px;height:430px;border-radius:0;box-shadow:none;
+  background:radial-gradient(circle at 62% 38%,rgba(var(--ac-rgb),.42),rgba(var(--ac-rgb),.18) 55%,rgba(var(--ac-rgb),.07) 80%);
+  transform:rotate(14deg);transition:background .6s;
+  -webkit-mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white'><line x1='230.0' y1='152.0' x2='297.5' y2='191.0' stroke-width='9'/><line x1='230.0' y1='172.3' x2='280.0' y2='201.1' stroke-width='7'/><line x1='297.5' y1='191.0' x2='297.5' y2='269.0' stroke-width='9'/><line x1='297.5' y1='269.0' x2='230.0' y2='308.0' stroke-width='9'/><line x1='280.0' y1='258.9' x2='230.0' y2='287.7' stroke-width='7'/><line x1='230.0' y1='308.0' x2='162.5' y2='269.0' stroke-width='9'/><line x1='162.5' y1='269.0' x2='162.5' y2='191.0' stroke-width='9'/><line x1='180.0' y1='258.9' x2='180.0' y2='201.1' stroke-width='7'/><line x1='162.5' y1='191.0' x2='230.0' y2='152.0' stroke-width='9'/><line x1='230.0' y1='152.0' x2='230.0' y2='78.0' stroke-width='8'/><line x1='297.5' y1='191.0' x2='361.6' y2='154.0' stroke-width='8'/><line x1='297.5' y1='269.0' x2='361.6' y2='306.0' stroke-width='8'/><line x1='230.0' y1='308.0' x2='230.0' y2='382.0' stroke-width='8'/><line x1='162.5' y1='269.0' x2='98.4' y2='306.0' stroke-width='8'/><line x1='162.5' y1='191.0' x2='98.4' y2='154.0' stroke-width='8'/></g><g fill='white'><circle cx='230.0' cy='152.0' r='24'/><circle cx='297.5' cy='191.0' r='24'/><circle cx='297.5' cy='269.0' r='24'/><circle cx='230.0' cy='308.0' r='24'/><circle cx='162.5' cy='269.0' r='24'/><circle cx='162.5' cy='191.0' r='24'/><circle cx='230.0' cy='78.0' r='26'/><circle cx='361.6' cy='154.0' r='15'/><circle cx='361.6' cy='306.0' r='26'/><circle cx='230.0' cy='382.0' r='15'/><circle cx='98.4' cy='306.0' r='26'/><circle cx='98.4' cy='154.0' r='15'/></g></svg>") center/contain no-repeat;mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white'><line x1='230.0' y1='152.0' x2='297.5' y2='191.0' stroke-width='9'/><line x1='230.0' y1='172.3' x2='280.0' y2='201.1' stroke-width='7'/><line x1='297.5' y1='191.0' x2='297.5' y2='269.0' stroke-width='9'/><line x1='297.5' y1='269.0' x2='230.0' y2='308.0' stroke-width='9'/><line x1='280.0' y1='258.9' x2='230.0' y2='287.7' stroke-width='7'/><line x1='230.0' y1='308.0' x2='162.5' y2='269.0' stroke-width='9'/><line x1='162.5' y1='269.0' x2='162.5' y2='191.0' stroke-width='9'/><line x1='180.0' y1='258.9' x2='180.0' y2='201.1' stroke-width='7'/><line x1='162.5' y1='191.0' x2='230.0' y2='152.0' stroke-width='9'/><line x1='230.0' y1='152.0' x2='230.0' y2='78.0' stroke-width='8'/><line x1='297.5' y1='191.0' x2='361.6' y2='154.0' stroke-width='8'/><line x1='297.5' y1='269.0' x2='361.6' y2='306.0' stroke-width='8'/><line x1='230.0' y1='308.0' x2='230.0' y2='382.0' stroke-width='8'/><line x1='162.5' y1='269.0' x2='98.4' y2='306.0' stroke-width='8'/><line x1='162.5' y1='191.0' x2='98.4' y2='154.0' stroke-width='8'/></g><g fill='white'><circle cx='230.0' cy='152.0' r='24'/><circle cx='297.5' cy='191.0' r='24'/><circle cx='297.5' cy='269.0' r='24'/><circle cx='230.0' cy='308.0' r='24'/><circle cx='162.5' cy='269.0' r='24'/><circle cx='162.5' cy='191.0' r='24'/><circle cx='230.0' cy='78.0' r='26'/><circle cx='361.6' cy='154.0' r='15'/><circle cx='361.6' cy='306.0' r='26'/><circle cx='230.0' cy='382.0' r='15'/><circle cx='98.4' cy='306.0' r='26'/><circle cx='98.4' cy='154.0' r='15'/></g></svg>") center/contain no-repeat}
+
+/* ============ הנפשות (שיעור 7 ואילך): פסים בהירים, אלקטרונים כחולים, על הרקע השחור ============ */
+:root{--fs:1}
+.anim.a7{position:relative;margin-top:4px;width:100%}
+.a7 svg{display:block;width:100%;height:auto;max-height:440px;overflow:hidden}
+.a7 .band{fill:none;stroke:#CFE3FF}   /* פס רך, בלי קצוות: שלוש טבעות שקופות (14.11) */
+.a7 .band.b1{stroke-opacity:.10;stroke-width:38}.a7 .band.b2{stroke-opacity:.15;stroke-width:24}.a7 .band.b3{stroke-opacity:.17;stroke-width:11}
+.a7 .nuc7{fill:#9BE15D}
+.a7 .sym{fill:#0B1A2E;font-weight:800;font-size:24px;text-anchor:middle;direction:ltr}
+.a7 .e7{fill:#2E6FE0;stroke:#fff;stroke-width:1.2}
+.a7 .e7.d{fill:#123E8C}
+.a7 .mlb{fill:#fff;font-weight:800;font-size:32px;text-anchor:middle;direction:rtl;transition:opacity .6s}
+.an-cap{min-height:40px;text-align:center;font-size:26px;font-weight:600;color:var(--text);line-height:1.35;transition:opacity .3s;padding:0 70px}
+.an-cap b{font-weight:800;color:var(--ac)}
+.an-again{position:absolute;left:0;bottom:0;border:none;border-radius:20px;padding:6px 16px;background:var(--ac);color:#04060C;font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;opacity:0;transition:opacity .4s}
+.an-again.on{opacity:1}
+/* סימן שאלה שמתחלף בתשובה כשהיא נחשפת */
+.qmw .qm{color:var(--muted)}
+.qmw:has(.frag.show) .qm{display:none}
+.tiles5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;width:100%}
+.tiles5>div{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:18px 10px;text-align:center}
+.tiles5 .sy{display:block;font-size:52px;font-weight:800;color:#fff;direction:ltr}
+.tiles5 .v{display:block;font-family:var(--mono);font-size:54px;font-weight:800;color:var(--ac);text-shadow:0 0 18px rgba(var(--ac-rgb),.5);margin-top:6px}
+.tiles5 .nm{display:block;font-size:21px;color:var(--muted);margin-top:6px}
+
+
+#deck::after{-webkit-mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white' stroke-width='5'><line x1='110' y1='150' x2='230' y2='110'/><line x1='110' y1='150' x2='230' y2='190'/><line x1='110' y1='150' x2='230' y2='270'/><line x1='110' y1='150' x2='230' y2='350'/><line x1='110' y1='230' x2='230' y2='110'/><line x1='110' y1='230' x2='230' y2='190'/><line x1='110' y1='230' x2='230' y2='270'/><line x1='110' y1='230' x2='230' y2='350'/><line x1='110' y1='310' x2='230' y2='110'/><line x1='110' y1='310' x2='230' y2='190'/><line x1='110' y1='310' x2='230' y2='270'/><line x1='110' y1='310' x2='230' y2='350'/><line x1='230' y1='110' x2='350' y2='190'/><line x1='230' y1='110' x2='350' y2='270'/><line x1='230' y1='190' x2='350' y2='190'/><line x1='230' y1='190' x2='350' y2='270'/><line x1='230' y1='270' x2='350' y2='190'/><line x1='230' y1='270' x2='350' y2='270'/><line x1='230' y1='350' x2='350' y2='190'/><line x1='230' y1='350' x2='350' y2='270'/></g><g fill='white'><circle cx='110' cy='150' r='24'/><circle cx='110' cy='230' r='24'/><circle cx='110' cy='310' r='24'/><circle cx='230' cy='110' r='22'/><circle cx='230' cy='190' r='22'/><circle cx='230' cy='270' r='22'/><circle cx='230' cy='350' r='22'/><circle cx='350' cy='190' r='26'/><circle cx='350' cy='270' r='26'/></g></svg>") center/contain no-repeat;mask:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 460'><g stroke='white' stroke-width='5'><line x1='110' y1='150' x2='230' y2='110'/><line x1='110' y1='150' x2='230' y2='190'/><line x1='110' y1='150' x2='230' y2='270'/><line x1='110' y1='150' x2='230' y2='350'/><line x1='110' y1='230' x2='230' y2='110'/><line x1='110' y1='230' x2='230' y2='190'/><line x1='110' y1='230' x2='230' y2='270'/><line x1='110' y1='230' x2='230' y2='350'/><line x1='110' y1='310' x2='230' y2='110'/><line x1='110' y1='310' x2='230' y2='190'/><line x1='110' y1='310' x2='230' y2='270'/><line x1='110' y1='310' x2='230' y2='350'/><line x1='230' y1='110' x2='350' y2='190'/><line x1='230' y1='110' x2='350' y2='270'/><line x1='230' y1='190' x2='350' y2='190'/><line x1='230' y1='190' x2='350' y2='270'/><line x1='230' y1='270' x2='350' y2='190'/><line x1='230' y1='270' x2='350' y2='270'/><line x1='230' y1='350' x2='350' y2='190'/><line x1='230' y1='350' x2='350' y2='270'/></g><g fill='white'><circle cx='110' cy='150' r='24'/><circle cx='110' cy='230' r='24'/><circle cx='110' cy='310' r='24'/><circle cx='230' cy='110' r='22'/><circle cx='230' cy='190' r='22'/><circle cx='230' cy='270' r='22'/><circle cx='230' cy='350' r='22'/><circle cx='350' cy='190' r='26'/><circle cx='350' cy='270' r='26'/></g></svg>") center/contain no-repeat;transform:rotate(-8deg)}
+.today{list-style:none;counter-reset:t;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 40px;width:100%}
+.today li{counter-increment:t;font-size:28px;font-weight:700;color:#fff;display:flex;align-items:center;gap:14px}
+.today li::before{content:counter(t);flex:0 0 auto;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:2px solid var(--ac);color:var(--ac);font-size:20px;font-weight:800}
+.concl{font-size:28px;font-weight:700;color:#fff;margin:22px 0 0}
+.concl em{font-style:normal;color:var(--ac)}
+.concl2{font-size:23px;font-weight:600;color:#C9D3E3;margin:6px 0 0}
+.lab{margin:0;font-size:20px;font-weight:800;color:var(--ac)}
+/* 2 */
+.demos{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%}
+.dm{padding:18px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);display:grid;gap:8px;align-content:start}
+.dm .di{font-size:40px}.dm b{font-size:26px;color:var(--ac)}.dm p{margin:0;font-size:21px;color:#fff;line-height:1.4}
+/* 3 */
+.flow{display:flex;align-items:stretch;gap:14px;width:100%}
+.fl{flex:1;display:grid;justify-items:center;gap:6px;text-align:center;padding:22px 16px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.fl .fi{font-size:44px}.fl b{font-size:27px;color:#fff}.fl p{margin:0;font-size:21px;color:#C9D3E3}
+.fl.hot{border-color:var(--ac);box-shadow:0 0 24px rgba(var(--ac-rgb),.35)}
+.far{align-self:center;font-size:36px;font-weight:800;color:var(--ac)}
+/* 4, 5 */
+.vs2{display:grid;grid-template-columns:1fr 1fr;gap:28px;width:100%}
+.side{display:grid;gap:12px;align-content:start;padding:18px 22px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.18)}
+.cap{margin:0;font-size:22px;color:#fff;line-height:1.45}
+.code{display:grid;gap:6px;font-family:inherit;font-weight:700;direction:rtl;font-size:24px;color:#9FD4FF;padding:14px 18px;border-radius:12px;background:#0B1424}
+.code b{color:#FFC24B}
+.train{position:relative;display:flex;align-items:center;gap:10px;height:130px}
+.docs{position:relative;width:120px;height:120px}
+.docs i{position:absolute;right:0;top:calc(var(--d) * 26px);width:44px;height:12px;border-radius:4px;background:#C9D3E3;opacity:0}
+.s.on:has(.hl-learn.show) .docs i{animation:fly 2.8s var(--d) ease-in infinite}
+@keyframes fly{0%{opacity:0;transform:translateX(0)}15%{opacity:1}80%{opacity:.9;transform:translateX(-90px) scale(.5)}100%{opacity:0;transform:translateX(-110px) scale(.3)}}
+.netm{width:170px;height:auto}
+.netm line{stroke:rgba(255,255,255,.25);stroke-width:2}
+.netm circle{fill:#5B6B80;transition:fill .6s}
+.s.on:has(.hl-learn.show) .netm circle{animation:glow 1.6s ease-in-out infinite}
+.s.on:has(.hl-learn.show) .netm circle:nth-of-type(3n){animation-delay:.5s}
+.s.on:has(.hl-learn.show) .netm circle:nth-of-type(3n+1){animation-delay:1s}
+@keyframes glow{0%,100%{fill:#5B6B80}50%{fill:var(--ac)}}
+.qq{display:grid;min-height:46px;font-size:28px;color:#fff;margin-bottom:12px}
+.qq>span{grid-area:1/1}
+.qq b{color:var(--ac)}
+.s:has(.hl-q2.show) .qq .hl-q1{opacity:0}
+.drawer{display:grid;gap:6px}
+.drawer span{font-size:19px;color:#1B2433;background:#F4F6FA;border-radius:8px;padding:6px 12px}
+.writer{display:grid;min-height:96px}
+.writer span{grid-area:1/1;font-size:21px;line-height:1.45;color:#fff;opacity:0;transition:opacity .6s}
+.ans{margin:0;font-size:24px;font-weight:800;color:var(--ok);opacity:0;display:none}
+.ans.no{color:var(--no)}
+.ans small{font-size:18px;font-weight:600;color:#C9D3E3}
+.s:has(.hl-q1.show):not(:has(.hl-q2.show)) :is(.a1,.b1){display:block;opacity:1}
+.s:has(.hl-q2.show) :is(.a2,.b2){display:block;opacity:1}
+.s:has(.hl-q1.show):not(:has(.hl-q2.show)) .w1,.s:has(.hl-q2.show) .w2{opacity:1}
+/* 6 */
+.np{display:grid;gap:4px;width:100%;max-width:880px;margin-inline:auto}
+.np-fig svg{width:100px!important}
+.np-h,.np-r{display:grid;grid-template-columns:1fr 200px 200px;align-items:center;gap:10px}
+.np-fig{display:grid;justify-items:center;gap:2px}
+.np-fig svg{width:120px;height:auto}
+.np-fig b{font-size:24px;color:#fff;font-weight:800}
+.np-t{font-size:28px;font-weight:700;color:#fff}
+.np-m{justify-self:center;font-size:36px;font-weight:900}
+.np-m.y{color:#3DDC97}.np-m.n{color:#FF5C6C}
+.np-r{padding:6px 0;border-top:1px solid rgba(255,255,255,.12)}
+/* 7 */
+.tasks{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;width:100%}
+.tk{display:grid;gap:10px;align-content:start;padding:16px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-top:5px solid var(--c)}
+.tk.ok{--c:#3DDC97}.tk.chk{--c:#FFC24B}.tk.no{--c:#FF5C6C}
+.tk b{font-size:22px;color:#fff;line-height:1.35}
+.tv{font-size:18px;color:var(--c);font-weight:700;line-height:1.35}
+.legend{display:flex;gap:26px;font-size:19px;font-weight:700}
+.legend span::before{content:'';display:inline-block;width:14px;height:14px;border-radius:50%;margin-inline-end:8px;vertical-align:middle;background:var(--c)}
+.legend .ok{--c:#3DDC97;color:#3DDC97}.legend .chk{--c:#FFC24B;color:#FFC24B}.legend .no{--c:#FF5C6C;color:#FF5C6C}
+/* 8 */
+.task{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:start;width:100%}
+.steps{margin:0;padding-inline-start:34px;display:grid;gap:12px}
+.steps li{font-size:28px;font-weight:700;color:#fff;line-height:1.35}
+.steps li::marker{color:var(--ac);font-weight:800}
+.qlist{padding:16px 22px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.qlist p{margin:0 0 8px;font-size:23px;color:#fff;line-height:1.4}
+.qlist .lab{font-size:19px}
+.qlist .pr{margin-top:12px;font-size:20px;color:#FFE3A3}
+/* 9 */
+.chk2{display:grid;gap:16px;width:100%}
+.cq{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;padding:16px 22px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.cq i{grid-row:span 2;font-style:normal;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--ac);color:var(--ac);font-size:20px;font-weight:800}
+.cq p{margin:0;font-size:28px;font-weight:800;color:#fff}
+.ca{font-size:22px;color:var(--ok)}
+/* טלפון לאורך (tools/phone_deck.py, ?phone=1): הרשתות של השיעור — זו מתחת לזו */
+html.ph.phport :is(.vs2,.task,.today){grid-template-columns:1fr!important}
+html.ph.phport :is(.demos,.tasks){grid-template-columns:1fr 1fr!important}
+html.ph.phport .flow{flex-direction:column}
+html.ph.phport .far{transform:rotate(-90deg)}
+html.ph.phport .np-h,html.ph.phport .np-r{grid-template-columns:1fr 90px 90px}
+html.ph.phport .np-fig svg{width:70px}
+@media (prefers-reduced-motion:reduce){.docs i,.netm circle{animation:none!important}}
+
+
+html.ph,html.ph body{overflow:hidden}
+html.ph #stage{bottom:48px!important;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+html.ph #deck{position:relative;left:auto;top:auto;margin:0;width:var(--phw);height:auto;min-height:var(--phh);transform:none!important;zoom:var(--phz)}
+html.ph #deck .s{position:relative;inset:auto;display:none;opacity:1;visibility:visible;transition:none;min-height:var(--phh);padding:84px 26px 36px;overflow:visible}
+html.ph #deck .s.on{display:flex}
+html.ph #deck .s--sec,html.ph #deck .s--cover{justify-content:center}
+html.ph .s--cover>.art{display:none}
+html.ph .cover__brand{position:static!important;margin-bottom:28px}
+html.ph.phport .split{grid-template-columns:1fr!important;gap:22px}
+html.ph.phport .cards.c2,html.ph.phport .cards.c3,html.ph.phport .cards.c4{grid-template-columns:1fr!important}
+html.ph.phport .cards.c5,html.ph.phport .mcq.four{grid-template-columns:1fr 1fr!important}
+html.ph.phport .stats,html.ph.phport .stats.two,html.ph.phport .stats.four{grid-template-columns:1fr!important}
+html.ph.phport .tiles5{grid-template-columns:repeat(3,1fr)}
+html.ph .figrow{flex-wrap:wrap;gap:18px}
+html.ph .art svg,html.ph .fig svg,html.ph .card svg{max-width:100%;height:auto}
+html.ph.phport .hdr{display:block}
+html.ph .timer,html.ph #hint{display:none!important}
+html.ph .tbl{font-size:22px}
+html.ph .tbl td,html.ph .tbl th{padding:6px 8px}
+html.ph .t-xl{font-size:68px}
+html.ph .sec__n{font-size:120px;line-height:1;margin-bottom:18px}
+html.ph .ttl{line-height:1.2}
+html.ph .an-cap{padding:0 8px 44px}
+html.ph #phbar{position:fixed;inset-inline:0;bottom:0;height:48px;background:#04060C;z-index:24;border-top:1px solid rgba(255,255,255,.1)}
+html.ph #navprev,html.ph #navnext,html.ph #home{top:auto;bottom:5px;transform:none}
+html.ph #navprev{right:10px;left:auto}
+html.ph #home{right:58px;left:auto}
+html.ph #navnext{left:10px;right:auto}
+html.ph #navnext.end{width:auto;padding:0 18px;border-radius:19px}
+html.ph #navnext.end .lbl{font-size:16px}
+html.ph #num{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:25}
+html.ph #bar{z-index:25}
+html.ph .ch__lesson{display:none}
+html.ph #chrome{padding:0 26px}
+html.ph #chrome::after{inset-inline:26px}
+</style>
+</head>
+<body tabindex="-1" data-ch="open" data-title="בינה מלאכותית, שיעור 1: מה היא ומה היא יודעת לעשות" data-meta="שיעור AI 1 לפי מסמך האב: מהי בינה מלאכותית ומה היא מסוגלת לעשות. מטרה: התלמידים יכירו בינה מלאכותית יוצרת, יבינו במה היא שונה מתוכנה רגילה, ויזהו שימושים משמעותיים שלה. בדיקת הבנה: התלמיד מסביר במה שונה מודל שפה ממאגר תשובות מוכנות, ונותן דוגמה לשימוש מועיל. ציוד: מקרן, Gemini פתוח בחשבון המורה. התנסות התלמידים: רק אחרי אישור הורים.">
+
+<div id="bar"><i></i></div>
+<div id="stage"><div id="deck" class="nochrome">
+
+<div id="chrome">
+  <div class="ch__sec"><i></i><span id="chSec"></span></div>
+  <div class="ch__r"><span class="ch__lesson">מבוא למדעים, י2, בינה מלאכותית, שיעור 1</span><img class="ch__logo" src="data:image/png;base64,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" alt=""></div>
+</div>
+
+<section data-min="2" data-ch="open" data-sec="פתיחה" data-title="מה נעשה היום" class="s" data-notes="&lt;b&gt;מה נעשה היום&lt;/b&gt;השיעור בשני מפגשים (החלטה 23.11). המפגש הזה: להבין מהי בינה מלאכותית ובמה היא שונה מתוכנה שפועלת לפי כללים. כ-28 דקות, והשאר לשאלות ולעיבוד.&lt;br&gt;המפגש השני (קובץ נפרד): חזרה קצרה, שימושים, ורוב הזמן התנסות ב-Gemini.&lt;br&gt;כל לחיצה מגלה שלב. לקרוא בקול. מבנה קבוע בכל שיעור.&lt;br&gt;זה השיעור הראשון ביחידה. בהמשך כל תלמיד יבנה בעזרת בינה מלאכותית עבודה מדעית על נושא שבחר.&lt;br&gt;">
+  <p class="eyebrow anim">בינה מלאכותית, שיעור 1, מפגש ראשון</p>
+  <h2 class="ttl t-lg anim">מהי בינה מלאכותית,<br>ומה היא יודעת לעשות?</h2>
+  <ol class="today mt"><li class="frag">מה Gemini יודע לעשות</li><li class="frag">תוכנה רגילה מול תוכנה שלמדה</li><li class="frag">מאגר תשובות או מודל שפה?</li><li class="frag">התוכנה היא לא אדם</li></ol>
+</section>
+
+<section data-min="10" data-ch="a" data-sec="מה Gemini יודע לעשות" data-title="מה Gemini יודע לעשות" class="s" data-notes="&lt;b&gt;הדגמה חיה: מה Gemini יודע לעשות&lt;/b&gt;המורה מקליד כל בקשה ב-Gemini על המקרן (חשבון המורה). כל לחיצה מגלה בקשה. אחרי כל בקשה מראים את התשובה של Gemini.&lt;br&gt;&lt;ul&gt;&lt;li&gt;הסבר: טקסט. • תמונה: יצירת תמונה זמינה גם לתלמידים מתחת לגיל 18 (Google, 20.10.2026). אם בתמונה יש שגיאה בשמות החלקים — מצוין. לשמור אותה לשיעור על תמונות.&lt;/li&gt;&lt;li&gt;בוחן ותכנון: Gemini מחזיר מבנה, לא רק פסקה.&lt;/li&gt;&lt;/ul&gt;השאלה בסוף („מה דומה ומה שונה?&amp;quot;): התשובה בשקופית הבאה. לתת לתלמידים לענות קודם.&lt;br&gt;אם אין חיבור: לספר מה Gemini היה עושה, ולהמשיך.&lt;br&gt;">
+  <p class="eyebrow anim">הדגמה, על המקרן</p>
+  <h2 class="ttl t-md anim">מה Gemini יודע לעשות?</h2>
+  <div class="demos mt"><div class="dm frag"><span class="di">✍️</span><b>הסבר</b><p>„הסבר לי בשלושה משפטים למה השמיים כחולים."</p></div><div class="dm frag"><span class="di">🖼️</span><b>תמונה</b><p>„צור תמונה של תא בעל חיים, עם שמות החלקים."</p></div><div class="dm frag"><span class="di">❓</span><b>בוחן</b><p>„בנה לי בוחן של שלוש שאלות על מערכת הדם."</p></div><div class="dm frag"><span class="di">📅</span><b>תכנון</b><p>„תכנן לי לוח זמנים ללמידה למבחן שיש לי בעוד שבוע."</p></div></div>
+  <p class="frag concl">מה דומה בכל ארבע הבקשות? ומה שונה?</p>
+</section>
+
+<section data-min="3" data-ch="a" data-sec="מה Gemini יודע לעשות" data-title="בינה מלאכותית יוצרת" class="s" data-notes="&lt;b&gt;מה משותף לכל הבקשות&lt;/b&gt;התשובה לשאלה מהשקופית הקודמת. כל לחיצה מוסיפה שלב.&lt;br&gt;המונח: „בינה מלאכותית יוצרת&amp;quot; (Generative AI). זה המונח של משרד החינוך („הנחיות שימוש בכלי בינה מלאכותית יוצרת&amp;quot;, ינואר 2026).&lt;br&gt;ההבדל בין הבקשות: סוג התוצר (טקסט, תמונה, בוחן). הדמיון: אותה דרך עבודה.&lt;br&gt;">
+  <p class="eyebrow anim">מה דומה?</p>
+  <h2 class="ttl t-md anim">בכל הבקשות: כותבים מילים, ומקבלים משהו חדש</h2>
+  <div class="flow mt">
+    <div class="fl frag"><span class="fi">⌨️</span><b>כתבתי בקשה</b><p>במילים רגילות</p></div>
+    <span class="far frag">←</span>
+    <div class="fl frag hot"><span class="fi">⚙️</span><b>התוכנה יצרה</b><p>תשובה שלא הייתה קיימת קודם</p></div>
+    <span class="far frag">←</span>
+    <div class="fl frag"><span class="fi">📄</span><b>קיבלתי</b><p>טקסט, תמונה, בוחן או תוכנית</p></div>
+  </div>
+  <p class="frag concl">לכן קוראים לזה <em>בינה מלאכותית יוצרת</em>: היא יוצרת משהו חדש.</p>
+</section>
+
+<section data-min="5" data-ch="a" data-sec="תוכנה רגילה מול תוכנה שלמדה" data-title="תוכנה רגילה מול תוכנה שלמדה" class="s" data-notes="&lt;b&gt;תוכנה רגילה מול תוכנה שלמדה&lt;/b&gt;לחיצה 1: תוכנה רגילה, שפועלת לפי כללים שהוגדרו מראש. לחיצה 2: בינה מלאכותית. טקסטים „נכנסים&amp;quot; לרשת, והרשת נדלקת. לחיצה 3: המונח „אימון&amp;quot;.&lt;br&gt;להדגיש: במחשבון, 2+2 תמיד 4. ב-Gemini, אותה שאלה יכולה לקבל תשובה אחרת. למה — בשיעור הבא.&lt;br&gt;„כמות עצומה&amp;quot;: לא נותנים מספר. בשיעור הבא מסבירים מה בדיוק היא לומדת.&lt;br&gt;דיוק: גם תוכנות רגילות יכולות להיות מורכבות מאוד, ולא כל מערכות ה-AI פועלות אותו דבר. ההבחנה כאן: כללים שהוגדרו מראש, מול דפוסים שנלמדו מנתונים.&lt;br&gt;מקורות: מחוון כשירויות בינה מלאכותית 2.0, על-יסודי, משרד החינוך (sources/), עמ׳ 6, תחום 1א: „כיצד פועלים כלי בינה מלאכותית… חיזוי המילה הבאה בטקסט&amp;quot;, „מהם מקורות המידע שלהם? אימון מודל, מאגרי מידע, רשת&amp;quot;, „מודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם&amp;quot;. Google, Machine Learning Crash Course, „Introduction to Large Language Models&amp;quot;.&lt;br&gt;">
+  <p class="eyebrow anim">איך תוכנה יודעת מה לעשות?</p>
+  <h2 class="ttl t-md anim">תוכנה רגילה מול תוכנה שלמדה</h2>
+  <div class="vs2 mt">
+    <div class="side frag hl-rule">
+      <p class="lab">תוכנה רגילה, כמו מחשבון</p>
+      <div class="code"><span>אם לחצו <b>+</b></span><span>חבר את שני המספרים</span></div>
+      <p class="cap">פועלת לפי כללים שאנשים הגדירו מראש.<br>אותה בקשה, תמיד אותה תשובה.</p>
+    </div>
+    <div class="side frag hl-learn">
+      <p class="lab">בינה מלאכותית</p>
+      <div class="train"><div class="docs"><i style="--d:0.0s"></i><i style="--d:0.35s"></i><i style="--d:0.7s"></i><i style="--d:1.0499999999999998s"></i><i style="--d:1.4s"></i><i style="--d:1.75s"></i><i style="--d:2.0999999999999996s"></i><i style="--d:2.4499999999999997s"></i></div>
+        <svg class="netm" viewBox="0 0 160 120"><line x1="20" y1="20" x2="80" y2="10"/><line x1="20" y1="20" x2="80" y2="45"/><line x1="20" y1="20" x2="80" y2="75"/><line x1="20" y1="20" x2="80" y2="110"/><line x1="20" y1="60" x2="80" y2="10"/><line x1="20" y1="60" x2="80" y2="45"/><line x1="20" y1="60" x2="80" y2="75"/><line x1="20" y1="60" x2="80" y2="110"/><line x1="20" y1="100" x2="80" y2="10"/><line x1="20" y1="100" x2="80" y2="45"/><line x1="20" y1="100" x2="80" y2="75"/><line x1="20" y1="100" x2="80" y2="110"/><line x1="80" y1="10" x2="140" y2="40"/><line x1="80" y1="10" x2="140" y2="80"/><line x1="80" y1="45" x2="140" y2="40"/><line x1="80" y1="45" x2="140" y2="80"/><line x1="80" y1="75" x2="140" y2="40"/><line x1="80" y1="75" x2="140" y2="80"/><line x1="80" y1="110" x2="140" y2="40"/><line x1="80" y1="110" x2="140" y2="80"/><circle cx="20" cy="20" r="7"/><circle cx="20" cy="60" r="7"/><circle cx="20" cy="100" r="7"/><circle cx="80" cy="10" r="7"/><circle cx="80" cy="45" r="7"/><circle cx="80" cy="75" r="7"/><circle cx="80" cy="110" r="7"/><circle cx="140" cy="40" r="7"/><circle cx="140" cy="80" r="7"/></svg></div>
+      <p class="cap">למדה דפוסים מתוך כמות עצומה של טקסטים שאנשים כתבו.<br>אף אחד לא כתב לה את התשובות.</p>
+    </div>
+  </div>
+  <p class="frag concl">לתהליך הזה קוראים <em>אימון</em>: התוכנה לומדת דפוסים מתוך דוגמאות.</p>
+</section>
+
+<section data-min="5" data-ch="a" data-sec="מאגר תשובות או מודל שפה" data-title="מאגר תשובות או מודל שפה" class="s" data-notes="&lt;b&gt;מאגר תשובות או מודל שפה&lt;/b&gt;לחיצה 1: שאלה רגילה. שניהם עונים. לחיצה 2: שאלה חדשה. המאגר לא מוצא; המודל כותב. לחיצה 3: המסקנה.&lt;br&gt;לשאול לפני לחיצה 2: „מה יקרה כשנשאל משהו שאף אחד לא שאל קודם?&amp;quot;&lt;br&gt;זו נקודת בדיקת ההבנה של השיעור (מסמך האב): „במה שונה מודל שפה ממאגר תשובות מוכנות?&amp;quot;&lt;br&gt;הכנה לשיעור הבא: כי המודל כותב ולא מעתיק, הוא יכול גם לכתוב משהו שלא נכון. לא לפתח עכשיו.&lt;br&gt;התשובה על הגשם היא פישוט שנכתב לילד בן 8. היא נכונה בעיקרה.&lt;br&gt;מקורות: מחוון כשירויות בינה מלאכותית 2.0, על-יסודי, משרד החינוך (sources/), עמ׳ 6, תחום 1א: „כיצד פועלים כלי בינה מלאכותית… חיזוי המילה הבאה בטקסט&amp;quot;, „מהם מקורות המידע שלהם? אימון מודל, מאגרי מידע, רשת&amp;quot;, „מודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם&amp;quot;. Google, Machine Learning Crash Course, „Introduction to Large Language Models&amp;quot;.&lt;br&gt;">
+  <p class="eyebrow anim">מה קורה בפנים?</p>
+  <h2 class="ttl t-md anim">מאגר תשובות, או מודל שפה?</h2>
+  <div class="cab mt">
+    <div class="qq"><span class="frag hl-q1">שאלה: <b>מה בירת צרפת?</b></span><span class="frag hl-q2">שאלה חדשה: <b>תסביר לי את הגשם כאילו אני בן 8</b></span></div>
+    <div class="vs2">
+      <div class="side">
+        <p class="lab">מאגר תשובות מוכנות</p>
+        <div class="drawer"><span>מה בירת צרפת? ← פריז</span><span>כמה זה 2+2? ← 4</span><span>מתי נוסדה המדינה? ← 1948</span></div>
+        <p class="ans a1">פריז ✔<br><small>מצאתי את התשובה במגירה.</small></p>
+        <p class="ans a2 no">אין לי תשובה כזו ✗<br><small>היא לא במגירה.</small></p>
+      </div>
+      <div class="side">
+        <p class="lab">מודל שפה</p>
+        <div class="writer"><span class="w1">פריז היא בירת צרפת.</span><span class="w2">כשהשמש מחממת מים, הם עולים לשמיים והופכים לעננים. כשבענן יש הרבה מים, הם נופלים בחזרה. זה הגשם.</span></div>
+        <p class="ans b1">כתב תשובה ✔</p>
+        <p class="ans b2">כתב תשובה חדשה ✔<br><small>אף אחד לא כתב אותה קודם.</small></p>
+      </div>
+    </div>
+  </div>
+  <p class="frag concl">מודל שפה לא שולף תשובה מוכנה ממגירה. הוא כותב אותה.</p>
+  <p class="frag concl2">לפעמים הוא גם מחפש ברשת, ואז כותב תשובה מתוך מה שמצא. על זה, בשיעור הבא.</p>
+</section>
+
+<section data-min="3" data-ch="b" data-sec="התוכנה היא לא אדם" data-title="התוכנה היא לא אדם" class="s" data-notes="&lt;b&gt;התוכנה היא לא אדם&lt;/b&gt;שקופית קלה, עם הומור. לשאול לפני כל שורה: „מי מהשניים עושה את זה?&amp;quot;&lt;br&gt;&lt;ul&gt;&lt;li&gt;מנהל שיחה: שניהם. בגלל זה קל לשכוח שמדברים עם תוכנה.&lt;/li&gt;&lt;li&gt;אם תלמיד שואל „יש לה רגשות?&amp;quot;: „העובדה שהיא כותבת כמו אדם לא מוכיחה שיש לה רגשות כמו לאדם. מדענים עדיין מתווכחים על זה.&amp;quot; לא לקבוע „אין לה רגשות&amp;quot; כעובדה מוכרעת.&lt;/li&gt;&lt;/ul&gt;  (בשורות בטבלה בכוונה רק דברים שאפשר לבדוק: אוכל, שינה, גוף.)&lt;br&gt;⚠️ ההומור מילולי: כל שורה נכונה כפשוטה.&lt;br&gt;מסמך האב, שיעור 1: „מדוע אין להסיק מהיכולת לנהל שיחה שהמערכת היא אדם?&amp;quot;&lt;br&gt;השורה החשובה היא האחרונה, „מנהל שיחה&amp;quot;: שלוש השורות הראשונות קלות ומצחיקות, והרביעית מראה מה כן משותף. המסקנה: יכולת לנהל שיחה בשפה אנושית לא הופכת את התוכנה לאדם.&lt;br&gt;סוף המפגש הראשון. לשאול: „מה הפתיע אתכם היום?&amp;quot;&lt;br&gt;מקורות: מחוון כשירויות בינה מלאכותית 2.0, על-יסודי, משרד החינוך (sources/), עמ׳ 6, תחום 1א: „כיצד פועלים כלי בינה מלאכותית… חיזוי המילה הבאה בטקסט&amp;quot;, „מהם מקורות המידע שלהם? אימון מודל, מאגרי מידע, רשת&amp;quot;, „מודלי שפה אינם ‚מבינים׳ את המידע כמו בני אדם&amp;quot;. Google, Machine Learning Crash Course, „Introduction to Large Language Models&amp;quot;.&lt;br&gt;">
+  <p class="eyebrow anim">רגע, מי זה?</p>
+  <h2 class="ttl t-md anim">התוכנה היא לא אדם</h2>
+  <div class="np mt">
+    <div class="np-h"><span></span><span class="np-fig"><svg viewBox="0 0 200 230" width="190"><circle cx="100" cy="52" r="34" fill="#FFD7A8"/><circle cx="88" cy="48" r="4" fill="#1B2433"/><circle cx="112" cy="48" r="4" fill="#1B2433"/><path d="M86 64 Q100 76 114 64" stroke="#1B2433" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="56" y="94" width="88" height="96" rx="30" fill="#5AA9E6"/><rect x="66" y="186" width="22" height="40" rx="9" fill="#1B3050"/><rect x="112" y="186" width="22" height="40" rx="9" fill="#1B3050"/></svg><b>אדם</b></span><span class="np-fig"><svg viewBox="0 0 200 230" width="190"><rect x="18" y="24" width="164" height="136" rx="14" fill="#1B3050" stroke="#8EC5FF" stroke-width="4"/><rect x="34" y="44" width="96" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="48" y="66" width="78" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="34" y="88" width="60" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="48" y="110" width="96" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="34" y="132" width="78" height="10" rx="5" fill="#8EC5FF" opacity=".85"/><rect x="146" y="132" width="6" height="16" fill="#8EC5FF"><animate attributeName="opacity" values="1;0;1" dur="1.1s" repeatCount="indefinite"/></rect><rect x="70" y="160" width="60" height="22" fill="#1B3050"/><rect x="40" y="182" width="120" height="14" rx="7" fill="#1B3050" stroke="#8EC5FF" stroke-width="3"/></svg><b>תוכנה</b></span></div>
+    <div class="np-r frag"><span class="np-t">אוכל פלאפל</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">ישן בלילה</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">יש לו גוף</span><span class="np-m y">✓</span><span class="np-m n">✗</span></div><div class="np-r frag"><span class="np-t">מנהל שיחה</span><span class="np-m y">✓</span><span class="np-m y">✓</span></div>
+  </div>
+  <p class="frag concl">היא מנהלת שיחה בשפה של בני אדם, כי היא למדה מטקסטים שאנשים כתבו. <em>זה לא הופך אותה לאדם.</em></p>
+</section>
+
+<div id="num" class="mono"></div>
+<div id="hint"><kbd>?</kbd> עזרה &nbsp; <kbd>G</kbd> דף השיעור &nbsp; <kbd>S</kbd> הערות המורה</div>
+</div></div>
+
+<div id="notes"></div>
+<div id="ov"><h4>כל השקופיות</h4><div id="ovg"></div></div>
+<div id="guide"></div>
+<div id="act"><button>סגירה ✕</button><iframe title="משימה" src="about:blank"></iframe></div>
+<div id="help"><div>
+  <h4>שליטה במצגת</h4>
+  <kbd>←</kbd> <kbd>רווח</kbd> <kbd>PageDown</kbd> קדימה, כולל חשיפת תשובות<br>
+  <kbd>→</kbd> <kbd>PageUp</kbd> אחורה<br>
+  <kbd>T</kbd> טיימר &nbsp;·&nbsp; <kbd>F</kbd> מסך מלא<br>
+  <kbd>S</kbd> הערות המורה &nbsp;·&nbsp; <kbd>G</kbd> דף השיעור להדפסה<br>
+  <kbd>O</kbd> כל השקופיות &nbsp;·&nbsp; <kbd>H</kbd> לשקופית הראשונה<br>
+  <kbd>?</kbd> סגירת החלון הזה
+</div></div>
+<script>
+/* Deck engine for the lecture "from the road to space".
+   A copy of the engine of the four "future in space" lessons, with the same keys, plus two additions:
+   each slide can set its chapter colour (data-ch), and a slide can hand the advance key to its own
+   controller (data-hook, registered in window.DeckHooks), so the launch scene runs inside the deck. */
+(function(){
+  var deck=document.getElementById('deck'),
+      slides=[].slice.call(deck.querySelectorAll('.s')),
+      bar=document.querySelector('#bar i'),
+      num=document.getElementById('num'),
+      chSec=document.getElementById('chSec'),
+      notes=document.getElementById('notes'),
+      ov=document.getElementById('ov'), ovg=document.getElementById('ovg'),
+      guide=document.getElementById('guide'),
+      help=document.getElementById('help'),
+      act=document.getElementById('act'),
+      stage=document.getElementById('stage'),
+      i=0, notesOn=false, t0=null,
+      reveal=/[?&]reveal\b/.test(location.search),
+      online=/^https?:$/.test(location.protocol);
+
+  /* ---- scale stage to viewport ---- */
+  function fit(){
+    var nh = notes.classList.contains('on') ? notes.offsetHeight : 0;
+    stage.style.bottom = nh+'px';
+    var availH = Math.max(120, window.innerHeight - nh);
+    var s=Math.min(window.innerWidth/1280, availH/720);
+    deck.style.transform='scale('+s+')';
+  }
+  window.addEventListener('resize',fit); fit();
+
+  function mins(sl){return parseFloat(sl.getAttribute('data-min')||'0')||0;}
+  function fmt(m){return String(Math.round(m*10)/10);}
+  function pad(n){return (n<10?'0':'')+n;}
+  var core=0, extra=0;
+  slides.forEach(function(sl){ if(sl.hasAttribute('data-skip')) extra+=mins(sl); else core+=mins(sl); });
+
+  /* ---- overview cards ---- */
+  slides.forEach(function(sl,n){
+    var t=sl.getAttribute('data-title')||'שקופית';
+    var d=document.createElement('div');
+    d.className='ovc'+(sl.hasAttribute('data-skip')?' skip':'');
+    d.innerHTML='<b>'+pad(n+1)+'</b>'+t+'<em>'+(mins(sl)?fmt(mins(sl))+' דק׳':'')+(sl.hasAttribute('data-skip')?' · ניתן לדלג':'')+'</em>';
+    d.onclick=function(){go(n,false);toggleOv(false);};
+    ovg.appendChild(d);
+  });
+  var ovcs=[].slice.call(ovg.children);
+
+  /* ---- printable lesson guide, built from the speaker notes ---- */
+  (function(){
+    var b=document.body;
+    var h='<div class="g"><div class="g__bar"><button id="gPrint">הדפסה</button><button id="gClose">סגירה</button></div>'+
+      '<h1>דף ההרצאה: '+(b.getAttribute('data-title')||document.title)+'</h1>'+
+      '<p class="g__meta">'+(b.getAttribute('data-meta')||'')+' ליבת ההרצאה: כ-'+fmt(core)+' דקות. עם שקופיות ההרחבה: כ-'+fmt(core+extra)+' דקות.</p><ol>';
+    slides.forEach(function(sl,n){
+      var m=mins(sl);
+      h+='<li class="g__it"><div class="g__h"><span class="mono">'+pad(n+1)+'</span><b>'+(sl.getAttribute('data-title')||'')+'</b>'+
+         (m?'<em>'+fmt(m)+' דק׳</em>':'')+(sl.hasAttribute('data-skip')?'<i>ניתן לדלג</i>':'')+'</div>'+
+         '<div class="g__n">'+(sl.getAttribute('data-notes')||'')+'</div></li>';
+    });
+    guide.innerHTML=h+'</ol></div>';
+    document.getElementById('gPrint').onclick=function(){window.print();};
+    document.getElementById('gClose').onclick=function(){toggleGuide(false);};
+  })();
+
+  /* ---- videos: embed when served over http, open YouTube when opened as a local file ---- */
+  function poster(el){
+    var id=el.getAttribute('data-id'), own=el.getAttribute('data-poster');
+    el.classList.remove('playing');
+    el.innerHTML='<img alt=""><span class="yt__play"></span>'+
+      '<span class="yt__lbl">'+(online?'לחצו להפעלה, או הקישו P':'לחצו לפתיחה ביוטיוב')+'</span>';
+    var im=el.querySelector('img');
+    /* YouTube answers a missing maxres thumbnail with a 120px grey placeholder, not with an error */
+    im.onload=function(){ if(!own && im.naturalWidth<=120 && im.src.indexOf('hqdefault')<0) im.src='https://i.ytimg.com/vi/'+id+'/hqdefault.jpg'; };
+    im.onerror=function(){ im.onerror=null; im.src='https://i.ytimg.com/vi/'+id+'/hqdefault.jpg'; };
+    im.src=own||('https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg');
+  }
+  function play(el){
+    var id=el.getAttribute('data-id'), st=el.getAttribute('data-start')||'0', en=el.getAttribute('data-end');
+    if(!online){ window.open('https://www.youtube.com/watch?v='+id+(st!=='0'?'&t='+st+'s':''),'_blank','noopener'); return; }
+    el.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&hl=he&cc_lang_pref=he&start='+st+(en?'&end='+en:'')+
+      '" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+    el.classList.add('playing');
+  }
+  var yts=[].slice.call(document.querySelectorAll('.yt'));
+  yts.forEach(function(el){ poster(el); el.addEventListener('click',function(e){ e.stopPropagation(); if(!el.classList.contains('playing')) play(el); }); });
+
+  /* ---- steps: fragments and multiple choice questions, revealed in document order by the advance key ---- */
+  function steps(sl){return [].slice.call(sl.querySelectorAll('.frag,.mcq'));}
+  function isDone(el){return el.classList.contains(el.classList.contains('mcq')?'done':'show');}
+  function countUp(el){
+    [].forEach.call(el.querySelectorAll('[data-count]'),function(c){
+      var to=parseFloat(c.getAttribute('data-count')), dec=(c.getAttribute('data-count').split('.')[1]||'').length, t1=null, dur=900;
+      function tick(ts){ if(t1===null) t1=ts; var k=Math.min(1,(ts-t1)/dur), v=to*(1-Math.pow(1-k,3));
+        c.textContent=v.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+        if(k<1) requestAnimationFrame(tick); }
+      requestAnimationFrame(tick);
+      /* if the tab is not painting, requestAnimationFrame never fires: make sure the final value is there */
+      setTimeout(function(){ c.textContent=to.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}); },dur+200);
+    });
+  }
+  function setStep(el,show,quiet){
+    if(el.classList.contains('mcq')){
+      el.classList.toggle('done',show);
+      if(!show) [].forEach.call(el.querySelectorAll('button'),function(b){b.classList.remove('wrong');});
+    } else {
+      el.classList.toggle('show',show);
+      if(show && !quiet) countUp(el);
+    }
+  }
+  function setAll(sl,show){steps(sl).forEach(function(el){setStep(el,show,true);});}
+
+  /* ---- hooks: an interactive slide takes the advance key while it has something to do ---- */
+  function hook(sl){ var n=sl&&sl.getAttribute('data-hook'), H=window.DeckHooks||{}; return n&&H[n]?H[n]:null; }
+
+  [].forEach.call(document.querySelectorAll('.mcq'),function(m){
+    [].forEach.call(m.querySelectorAll('button'),function(b,n){
+      if(!b.querySelector('i')){ var t=document.createElement('i'); t.textContent='אבגדהו'.charAt(n); b.insertBefore(t,b.firstChild); }
+      b.classList.toggle('right',b.hasAttribute('data-ok'));
+      b.addEventListener('click',function(e){
+        e.stopPropagation();
+        if(m.classList.contains('done')) return;
+        if(b.hasAttribute('data-ok')) m.classList.add('done'); else b.classList.add('wrong');
+      });
+    });
+  });
+
+  /* ---- countdown timers for group work ---- */
+  function showT(el){ var s=el._left; el.firstChild.nodeValue=pad(Math.floor(s/60))+':'+pad(s%60); }
+  [].forEach.call(document.querySelectorAll('.timer'),function(el){
+    el._total=parseInt(el.getAttribute('data-sec'),10)||180; el._left=el._total;
+    el.innerHTML='00:00<small>לחצו להפעלה, או הקישו T</small>'; showT(el);
+    el.addEventListener('click',function(e){ e.stopPropagation(); toggleTimer(el); });
+  });
+  function toggleTimer(el){
+    if(el.classList.contains('end')){ el.classList.remove('end'); el._left=el._total; showT(el); return; }
+    if(el._iv){ clearInterval(el._iv); el._iv=null; el.classList.remove('run'); return; }
+    el.classList.add('run');
+    el._iv=setInterval(function(){
+      el._left--; showT(el);
+      if(el._left<=0){ clearInterval(el._iv); el._iv=null; el.classList.remove('run'); el.classList.add('end'); }
+    },1000);
+  }
+  function stopTimers(sl){ [].forEach.call(sl.querySelectorAll('.timer'),function(el){ if(el._iv){clearInterval(el._iv);el._iv=null;} el.classList.remove('run','end'); el._left=el._total; showT(el); }); }
+
+  /* ---- activity overlay: the student mission page, shown on the board ---- */
+  function openAct(url){ act.querySelector('iframe').src=url; act.classList.add('on'); }
+  function closeAct(){ if(!act.classList.contains('on')) return; act.classList.remove('on'); act.querySelector('iframe').src='about:blank'; try{document.body.focus();}catch(e){} }
+  [].forEach.call(document.querySelectorAll('[data-act]'),function(b){
+    b.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); openAct(b.getAttribute('data-act')); });
+  });
+  act.querySelector('button').addEventListener('click',closeAct);
+  window.addEventListener('message',function(e){ if(e.data==='act-close') closeAct(); });
+
+  function go(n,back){
+    if(n<0||n>=slides.length) return;
+    [].forEach.call(slides[i].querySelectorAll('.yt.playing'),poster);
+    [].forEach.call(slides[i].querySelectorAll('video'),function(v){ try{v.pause();}catch(e){} });
+    stopTimers(slides[i]);
+    var ho=hook(slides[i]); if(ho&&ho.leave) ho.leave(slides[i]);
+    slides[i].classList.remove('on');
+    i=n;
+    document.body.setAttribute('data-ch',slides[i].getAttribute('data-ch')||'');
+    setAll(slides[i],!!back||reveal);
+    slides[i].classList.add('on');
+    deck.classList.toggle('nochrome',!slides[i].getAttribute('data-sec'));
+    deck.classList.toggle('cover-on',i===0);
+    chSec.textContent=slides[i].getAttribute('data-sec')||'';
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    draw();
+    notes.innerHTML=slides[i].getAttribute('data-notes')||'<b>אין הערות לשקופית זו</b>';
+    ovcs.forEach(function(c,k){c.classList.toggle('cur',k===i);});
+    [].forEach.call(slides[i].querySelectorAll('video[data-auto]'),function(v){ try{v.currentTime=0;var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){});}catch(e){} });
+    var hn=hook(slides[i]); if(hn&&hn.enter) hn.enter(slides[i],!!back||reveal);
+    try{ history.replaceState(null,'','#'+(i+1)); }catch(e){}
+  }
+  function draw(){
+    var s=pad(i+1)+' / '+pad(slides.length);
+    if(t0!==null){var e=Math.floor((Date.now()-t0)/1000); s+='  ·  '+pad(Math.floor(e/60))+':'+pad(e%60);}
+    num.textContent=s;
+  }
+  setInterval(draw,1000);
+  function next(){
+    if(t0===null) t0=Date.now();
+    var h=hook(slides[i]); if(h&&h.next&&h.next(slides[i])) return;
+    var f=steps(slides[i]).filter(function(x){return !isDone(x);});
+    if(f.length){setStep(f[0],true);return;}
+    go(i+1,false);
+  }
+  function prev(){
+    var h=hook(slides[i]); if(h&&h.prev&&h.prev(slides[i])) return;
+    var f=steps(slides[i]).filter(isDone);
+    if(f.length){setStep(f[f.length-1],false);return;}
+    go(i-1,true);
+  }
+  function toggleNotes(v){notesOn=(v===undefined)?!notesOn:v;notes.classList.toggle('on',notesOn);fit();}
+  function toggleOv(v){ov.classList.toggle('on',(v===undefined)?!ov.classList.contains('on'):v);}
+  function toggleHelp(v){help.classList.toggle('on',(v===undefined)?!help.classList.contains('on'):v);}
+  function toggleGuide(v){guide.classList.toggle('on',(v===undefined)?!guide.classList.contains('on'):v);}
+
+  document.addEventListener('keydown',function(e){
+    var k=e.key;
+    /* S opens the notes, so Cmd+S is an easy slip: do not let it save a copy of the page */
+    if((e.metaKey||e.ctrlKey)&&(k==='s'||k==='S'||k==='ד')){e.preventDefault();return;}
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    if(k==='Escape'){closeAct();toggleOv(false);toggleHelp(false);toggleGuide(false);return;}
+    if(act.classList.contains('on')) return;
+    if(k==='g'||k==='G'||k==='ע'){e.preventDefault();toggleGuide();return;}
+    if(guide.classList.contains('on')) return;
+    if(k==='?'||k==='/'){e.preventDefault();toggleHelp();return;}
+    if(k==='o'||k==='O'||k==='ם'){e.preventDefault();toggleOv();return;}
+    if(k==='s'||k==='S'||k==='ד'){e.preventDefault();toggleNotes();return;}
+    if(k==='h'||k==='H'||k==='י'){e.preventDefault();go(0,false);return;}
+    if(k==='f'||k==='F'||k==='כ'){e.preventDefault();
+      if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+      else{document.exitFullscreen&&document.exitFullscreen();} return;}
+    if(k==='p'||k==='P'||k==='פ'){e.preventDefault();
+      var y=slides[i].querySelector('.yt'); if(y){ y.classList.contains('playing') ? poster(y) : play(y); return; }
+      var v=slides[i].querySelector('video'); if(v){ if(v.ended) v.currentTime=0; if(v.paused){ var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}); } else v.pause(); } return;}
+    if(k==='t'||k==='T'||k==='א'){e.preventDefault(); var tm=slides[i].querySelector('.timer'); if(tm) toggleTimer(tm); return;}
+    if(k==='m'||k==='M'||k==='צ'){e.preventDefault(); var a=slides[i].querySelector('[data-act]'); if(a) openAct(a.getAttribute('data-act')); return;}
+    if(k==='Home'){e.preventDefault();go(0,false);return;}
+    if(k==='End'){e.preventDefault();go(slides.length-1,false);return;}
+    /* עברית: חץ שמאלה קדימה, חץ ימינה אחורה (יניב, 27.10). PageDown/PageUp — כמו בשלט מצגות */
+    if(k===' '||k==='ArrowLeft'||k==='ArrowDown'||k==='PageDown'||k==='Enter'){e.preventDefault();next();return;}
+    if(k==='ArrowRight'||k==='ArrowUp'||k==='PageUp'||k==='Backspace'){e.preventDefault();prev();return;}
+  });
+
+  /* click: left half of the screen moves forward, right half moves back */
+  stage.addEventListener('click',function(e){
+    if(ov.classList.contains('on')||help.classList.contains('on')||guide.classList.contains('on')||act.classList.contains('on'))return;
+    if(e.target.closest('.yt,a,button,.timer,video,input,select'))return;
+    (e.clientX < window.innerWidth/2) ? next() : prev();
+  });
+
+  /* swipe */
+  var x0=null;
+  document.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null)return; var dx=e.changedTouches[0].clientX-x0;
+    if(Math.abs(dx)>50 && !act.classList.contains('on')){ dx<0 ? next() : prev(); } x0=null;
+  },{passive:true});
+
+  window.DeckGo=function(d){ go(i+d,false); };
+
+  /* deep link: #12 opens slide 12 */
+  function fromHash(){var h=parseInt((location.hash||'').replace('#',''),10); return (h>=1&&h<=slides.length)?h-1:-1;}
+  window.addEventListener('hashchange',function(){var n=fromHash(); if(n>=0&&n!==i) go(n,false);});
+  go(Math.max(0,fromHash()),false);
+  /* ?guide opens the printable lesson plan straight away, for the link on the hub page */
+  if(/[?&]guide\b/.test(location.search)) toggleGuide(true);
+  try{ window.focus(); document.body.focus(); }catch(e){}
+  window.addEventListener('load',function(){ try{document.body.focus();}catch(e){} });
+})();
+
+</script>
+<script>
+
+</script>
+
+<script>
+(function(){
+  var forced=/[?&]phone=1/.test(location.search);
+  function isPhone(){ return forced || (Math.min(screen.width,screen.height)<500 && matchMedia('(pointer:coarse)').matches); }
+  var root=document.documentElement, stage=document.getElementById('stage'), deck=document.getElementById('deck');
+  var bar=document.createElement('div'); bar.id='phbar'; document.body.appendChild(bar);
+  // גודל המסך האמיתי (layout viewport) — לא inner*, שבאייפון משתנים בזום של אצבעות
+  function layout(){
+    var on=isPhone(); root.classList.toggle('ph',on); if(!on) return;
+    // לאורך: רוחב 640 והעמודות נערמות; לרוחב: רוחב 1000 והעמודות נשארות זו ליד זו
+    var w=root.clientWidth, port=root.clientHeight>w, lw=port?640:1000, z=w/lw;
+    root.classList.toggle('phport',port);
+    root.style.setProperty('--phw',lw+'px'); root.style.setProperty('--phz',z);
+    root.style.setProperty('--phh',((root.clientHeight-48)/z)+'px');
+  }
+  new MutationObserver(function(ms){
+    if(!root.classList.contains('ph')) return;
+    for(var i=0;i<ms.length;i++){ var t=ms[i].target, was=ms[i].oldValue||'';
+      if(t.parentNode===deck && t.classList.contains('s') && t.classList.contains('on') && !/\bon\b/.test(was)) stage.scrollTop=0;
+      else if((t.classList.contains('show')&&!/\bshow\b/.test(was)) || (t.classList.contains('done')&&!/\bdone\b/.test(was))){
+        var r=t.getBoundingClientRect(), vr=stage.getBoundingClientRect();
+        if(r.bottom>vr.bottom-8) stage.scrollBy({top:Math.min(r.bottom-vr.bottom+24, r.top-vr.top-12),behavior:'smooth'});
+      }
+    }
+  }).observe(deck,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
+  // מה שעדיין רחב מהשקופית (שורת אטומים, טבלה, תרשים זרימה) — מוקטן כיחידה אחת לרוחב שלו (22.11)
+  function fit(sl){
+    if(!sl||!root.classList.contains('ph')) return;
+    var z=sl.querySelectorAll('[data-phz]'); for(var i=0;i<z.length;i++){ z[i].style.zoom=''; z[i].removeAttribute('data-phz'); }
+    for(var pass=0;pass<3;pass++){
+      var all=sl.querySelectorAll('*'), done=false;
+      for(var i=0;i<all.length;i++){ var e=all[i];
+        if(e.closest('svg')||e.closest('[data-phz]')||!e.children.length||!e.offsetParent) continue;
+        var cs=getComputedStyle(e); if(cs.position==='absolute'||cs.position==='fixed') continue;
+        var r=e.getBoundingClientRect(); if(r.width<40) continue;
+        var lo=r.left, hi=r.right;
+        for(var c=0;c<e.children.length;c++){ var k=e.children[c], kc=getComputedStyle(k);
+          if(kc.position==='absolute'||kc.position==='fixed'||kc.display==='none') continue;
+          var q=k.getBoundingClientRect(); if(!q.width) continue; lo=Math.min(lo,q.left); hi=Math.max(hi,q.right); }
+        var need=hi-lo; if(need>r.width+4){ e.style.zoom=(r.width/need).toFixed(3); e.setAttribute('data-phz','1'); done=true; }
+      }
+      if(!done) break;
+    }
+  }
+  function cur(){ return deck.querySelector('.s.on'); }
+  new MutationObserver(function(ms){ for(var i=0;i<ms.length;i++){ var t=ms[i].target;
+    if(t.parentNode===deck&&t.classList.contains('on')&&!/\bon\b/.test(ms[i].oldValue||'')) setTimeout(function(){fit(cur())},30); } })
+    .observe(deck,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
+  addEventListener('resize',function(){ setTimeout(function(){fit(cur())},60); });
+  addEventListener('resize',layout);
+  layout();
+  setTimeout(function(){fit(cur())},60);
+})();
+</script>
+</body>
+</html>
