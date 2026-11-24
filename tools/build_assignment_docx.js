@@ -2,7 +2,9 @@
 // התוכן: הקובץ של יניב (24.11.2026) אחרי התיקונים. שימוש: node tools/build_assignment_docx.js [קובץ פלט]
 const fs = require('fs');
 const path = require('path');
-const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, Footer, BorderStyle } = require('docx');
+const { Document, Packer, Paragraph, TextRun, AlignmentType, LevelFormat, Footer, Header, ImageRun, BorderStyle } = require('docx');
+// הסמל של בית הספר (מקיף שש שנתי ע"ש יונתן נתניהו), אותו קובץ שבמצגות
+const LOGO = fs.readFileSync(path.join(__dirname, 'deck', 'logo.png'));
 
 const OUT = process.argv[2] || path.join(__dirname, '..', 'lessons', 'עבודה-לחופש', 'עבודה-במדעים.docx');
 const FONT = 'Arial';
@@ -34,6 +36,8 @@ const doc = new Document({
     alignment: AlignmentType.START, style: { paragraph: { indent: { start: 540, hanging: 270 } } } }] }] },
   sections: [{
     properties: { page: { margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } }, bidi: true },
+    headers: { default: new Header({ children: [new Paragraph({ bidirectional: true, alignment: AlignmentType.END, spacing: { after: 0 },
+      children: [new ImageRun({ type: 'png', data: LOGO, transformation: { width: 72, height: 72 } })] })] }) },
     footers: { default: new Footer({ children: [para([run('עבודה במדעים | כיתה י׳2', { size: 18, color: MUTED })], { align: AlignmentType.CENTER, after: 0 })] }) },
     children: [
       // פתיחה
